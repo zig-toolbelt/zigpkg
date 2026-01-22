@@ -6,8 +6,10 @@ node_modules
 .vercel
 .netlify
 .wrangler
+.zig-cache
 /.svelte-kit
 /build
+zig-out
 
 # OS
 .DS_Store
