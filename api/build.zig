@@ -123,4 +123,20 @@ pub fn build(b: *std.Build) void {
     //
     // Lastly, the Zig build system is relatively simple and self-contained,
     // and reading its source code will allow you to master it.
+
+    // Format step: zig build fmt
+    const fmt_step = b.step("fmt", "Format source code");
+    const fmt_cmd = b.addFmt(.{
+        .paths = &.{"src"},
+    });
+    fmt_step.dependOn(&fmt_cmd.step);
+
+    // Check step: zig build check
+    const check_step = b.step("check", "Check if code compiles");
+    check_step.dependOn(&exe.step);
+
+    // Clean step: zig build clean
+    const clean_step = b.step("clean", "Remove build artifacts");
+    const clean_cmd = b.addSystemCommand(&.{ "rm", "-rf", ".zig-cache", "zig-out" });
+    clean_step.dependOn(&clean_cmd.step);
 }
