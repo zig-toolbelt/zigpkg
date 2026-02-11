@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache,id=bun,bundle=bun_deps \
 FROM base AS prod-deps
 WORKDIR /app
 COPY package.json bun.lock* ./
-RUN --mount=type=cache,target=/root/.bun/install/cache,id=bun,bundle=bun_prod_deps \
+RUN --mount=type=cache,target=/root/.bun/install/cache,id=bun_deps \
   bun install --frozen-lockfile --production
 
 FROM base AS builder
