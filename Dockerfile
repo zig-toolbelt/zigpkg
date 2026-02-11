@@ -23,7 +23,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
-  PORT=3000 \
+  PORT=3200 \
   BUN_RUNTIME_SECMGR_ENABLED=1
 
 # tini + curl for healthcheck/signals
@@ -37,10 +37,10 @@ COPY --from=builder --chown=app:app /app/build ./build
 COPY --from=builder --chown=app:app /app/package.json ./
 
 USER app
-EXPOSE 3000
+EXPOSE 3200
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+  CMD curl -f http://localhost:3200/ || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["bun", "./build/index.js"]
