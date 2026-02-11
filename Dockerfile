@@ -4,7 +4,7 @@ FROM oven/bun:1-alpine AS base
 FROM base AS deps
 WORKDIR /app
 COPY package.json bun.lock* ./
-RUN --mount=type=cache,target=/root/.bun/install/cache,id=bun,bundle=bun_deps \
+RUN --mount=type=cache,target=/root/.bun/install/cache,id=bun_deps \
   bun install --frozen-lockfile
 
 FROM base AS prod-deps
