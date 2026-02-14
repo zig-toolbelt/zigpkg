@@ -2,23 +2,24 @@
   const links = {
     community: [
       { label: "Discord", href: "https://discord.gg/zig" },
-      { label: "Twitter", href: "https://twitter.com/zigpkg" },
-      { label: "GitHub", href: "https://github.com/zigpkg" },
+      {
+        label: "Twitter",
+        href: "https://x.com/i/communities/1830711127354851778",
+      },
+      { label: "GitHub", href: "https://github.com/zig-toolbelt/zigpkg" },
     ],
     resources: [
       { label: "Documentation", href: "/docs" },
       { label: "Blog", href: "/blog" },
-      { label: "Design Kit", href: "#" },
     ],
     ecosystem: [
-      { label: "Packages", href: "/" },
-      { label: "Release Notes", href: "#" },
-      { label: "Jobs", href: "#" },
+      { label: "Packages", href: "/packages" },
+      { label: "Release Notes", href: "/releases" },
     ],
     legal: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
-      { label: "Cookie Policy", href: "#" },
+      { label: "Cookie Policy", href: "/coockie" },
     ],
   };
 </script>
@@ -31,67 +32,52 @@
       <div>
         <h4 class="font-bold text-slate-900 mb-4">Community</h4>
         <ul class="space-y-3 text-sm text-slate-500">
-          <li>
-            <a href="#" class="hover:text-yellow-600 transition-colors"
-              >Discord</a
-            >
-          </li>
-          <li>
-            <a href="#" class="hover:text-yellow-600 transition-colors">
-              Twitter
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/zig-toolbelt" class="hover:text-yellow-600 transition-colors">
-              GitHub
-            </a>
-          </li>
+          {#each links.community as c}
+            <li>
+              <a href={c.href} class="hover:text-yellow-600 transition-colors"
+                >{c.label}</a
+              >
+            </li>
+          {/each}
         </ul>
       </div>
       <!-- Column 2 -->
       <div>
         <h4 class="font-bold text-slate-900 mb-4">Resources</h4>
         <ul class="space-y-3 text-sm text-slate-500">
-          <li>
-            <a href="/docs" class="hover:text-yellow-600 transition-colors">
-              Documentation
-            </a>
-          </li>
-          <li>
-            <a href="/blog" class="hover:text-yellow-600 transition-colors">Blog</a>
-          </li>
+          {#each links.resources as r}
+            <li>
+              <a href={r.href} class="hover:text-yellow-600 transition-colors">
+                {r.label}
+              </a>
+            </li>
+          {/each}
         </ul>
       </div>
       <!-- Column 3 -->
       <div>
         <h4 class="font-bold text-slate-900 mb-4">Ecosystem</h4>
         <ul class="space-y-3 text-sm text-slate-500">
-          <li>
-            <a href="#" class="hover:text-yellow-600 transition-colors">
-              Packages
-            </a>
-          </li>
+          {#each links.ecosystem as l}
+            <li>
+              <a href={l.href} class="hover:text-yellow-600 transition-colors">
+                {l.label}
+              </a>
+            </li>
+          {/each}
         </ul>
       </div>
       <!-- Column 4 -->
       <div>
         <h4 class="font-bold text-slate-900 mb-4">Legal</h4>
         <ul class="space-y-3 text-sm text-slate-500">
-          <li>
-            <a href="#" class="hover:text-yellow-600 transition-colors">
-              Privacy Policy
-            </a>
-          </li>
-          <li>
-            <a href="#" class="hover:text-yellow-600 transition-colors"
-              >Terms of Service</a
-            >
-          </li>
-          <li>
-            <a href="#" class="hover:text-yellow-600 transition-colors"
-              >Cookie Policy</a
-            >
-          </li>
+          {#each links.legal as l}
+            <li>
+              <a href={l.href} class="hover:text-yellow-600 transition-colors">
+                {l.label}
+              </a>
+            </li>
+          {/each}
         </ul>
       </div>
     </div>
