@@ -10,7 +10,7 @@
   }: {
     version: string;
     license: string | null;
-    zonInfo: { minimumZigVersion?: string } | null;
+    zonInfo: { minimumZigVersion?: string | null } | null;
     pushedAt: string;
     createdAt: string;
   } = $props();

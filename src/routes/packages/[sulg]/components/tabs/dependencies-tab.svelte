@@ -2,7 +2,7 @@
   let {
     dependencies,
   }: {
-    dependencies: { name: string; url?: string; path?: string; hash?: string }[];
+    dependencies: { name: string; url?: string | null; path?: string | null; hash?: string | null }[];
   } = $props();
 </script>
 
