@@ -17,23 +17,47 @@
   const pkg = $derived(data.package);
 
   const daysSinceCommit = $derived(
-    Math.floor((Date.now() - new Date(pkg.pushedAt).getTime()) / (1000 * 60 * 60 * 24))
+    Math.floor(
+      (Date.now() - new Date(pkg.pushedAt).getTime()) / (1000 * 60 * 60 * 24),
+    ),
   );
 
   const relativeDate = $derived.by(() => {
-    if (daysSinceCommit === 0) return 'today';
-    if (daysSinceCommit === 1) return 'yesterday';
+    if (daysSinceCommit === 0) return "today";
+    if (daysSinceCommit === 1) return "yesterday";
     if (daysSinceCommit < 30) return `${daysSinceCommit} days ago`;
-    if (daysSinceCommit < 365) return `${Math.floor(daysSinceCommit / 30)} months ago`;
+    if (daysSinceCommit < 365)
+      return `${Math.floor(daysSinceCommit / 30)} months ago`;
     return `${Math.floor(daysSinceCommit / 365)} years ago`;
   });
 
   const activity = $derived.by(() => {
-    if (daysSinceCommit < 30)
-      return { label: 'Active', color: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-200', pulse: true };
-    if (daysSinceCommit < 180)
-      return { label: 'Moderate', color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-200', pulse: false };
-    return { label: 'Inactive', color: 'text-slate-400', bg: 'bg-slate-50', border: 'border-slate-200', pulse: false };
+    switch (true) {
+      case daysSinceCommit < 30:
+        return {
+          label: "Active",
+          color: "text-emerald-500",
+          bg: "bg-emerald-50",
+          border: "border-emerald-200",
+          pulse: true,
+        };
+      case daysSinceCommit < 180:
+        return {
+          label: "Moderate",
+          color: "text-amber-500",
+          bg: "bg-amber-50",
+          border: "border-amber-200",
+          pulse: false,
+        };
+      default:
+        return {
+          label: "Inactive",
+          color: "text-slate-400",
+          bg: "bg-slate-50",
+          border: "border-slate-200",
+          pulse: false,
+        };
+    }
   });
 </script>
 
@@ -49,8 +73,17 @@
         href="/packages"
         class="text-sm text-slate-400 hover:text-yellow-600 transition-colors flex items-center gap-1"
       >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          ><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          /></svg
         >
         Back to packages
       </a>
@@ -60,21 +93,32 @@
       <div>
         <div class="flex flex-wrap items-center gap-3 mb-2">
           <h1 class="text-3xl font-bold text-slate-900">{pkg.name}</h1>
-          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200"
-            >{pkg.version}</span
+          <span
+            class="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200"
           >
-          <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-200"
-            >{pkg.packageType}</span
+            {pkg.version}
+          </span>
+          <span
+            class="text-xs font-medium px-2.5 py-1 rounded-full bg-green-50 text-green-600 border border-green-200"
           >
+            {pkg.packageType}
+          </span>
         </div>
         <div class="flex items-center gap-2 mt-1 mb-2">
           <svg
-            class="w-4 h-4 {activity.color} {activity.pulse ? 'animate-pulse' : ''}"
+            class="w-4 h-4 {activity.color} {activity.pulse
+              ? 'animate-pulse'
+              : ''}"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M22 12h-4l-3 9L9 3l-3 9H2"
+            />
           </svg>
           <span
             class="text-xs font-semibold px-2 py-0.5 rounded-full border {activity.bg} {activity.color} {activity.border}"
@@ -83,7 +127,9 @@
           </span>
           <span class="text-slate-300 text-xs">·</span>
           <span class="text-xs text-slate-400">
-            Last commit <span class="font-medium text-slate-600">{relativeDate}</span>
+            Last commit <span class="font-medium text-slate-600">
+              {relativeDate}
+            </span>
           </span>
         </div>
         <p class="text-slate-500 text-lg max-w-2xl">{pkg.description}</p>
@@ -113,21 +159,24 @@
     <nav class="flex gap-0 -mb-px">
       <button
         onclick={() => (activeTab = "readme")}
-        class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors {activeTab === 'readme'
+        class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors {activeTab ===
+        'readme'
           ? 'border-yellow-400 text-yellow-700'
           : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300'}"
         >Readme</button
       >
       <button
         onclick={() => (activeTab = "code")}
-        class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors {activeTab === 'code'
+        class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors {activeTab ===
+        'code'
           ? 'border-yellow-400 text-yellow-700'
           : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300'}"
         >Code</button
       >
       <button
         onclick={() => (activeTab = "versions")}
-        class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 {activeTab === 'versions'
+        class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 {activeTab ===
+        'versions'
           ? 'border-yellow-400 text-yellow-700'
           : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300'}"
         >Versions {#if data.tags.length > 0}<span
@@ -137,7 +186,8 @@
       >
       <button
         onclick={() => (activeTab = "dependencies")}
-        class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 {activeTab === 'dependencies'
+        class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 {activeTab ===
+        'dependencies'
           ? 'border-yellow-400 text-yellow-700'
           : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300'}"
         >Dependencies {#if data.dependencies.length > 0}<span
@@ -168,7 +218,11 @@
         <Topics items={pkg.topics} />
       {/if}
       <PackageLinks repositoryUrl={pkg.repositoryUrl} homepage={pkg.homepage} />
-      <PackageStats stars={pkg.stars} forks={pkg.forks} openIssues={pkg.openIssues} />
+      <PackageStats
+        stars={pkg.stars}
+        forks={pkg.forks}
+        openIssues={pkg.openIssues}
+      />
       <PackageDetails
         version={pkg.version}
         license={pkg.license}
