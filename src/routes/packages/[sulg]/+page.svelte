@@ -70,7 +70,7 @@
   <div class="mb-6">
     <div class="flex flex-wrap items-center gap-3 mb-2">
       <a
-        href="/packages"
+        href="/"
         class="text-sm text-slate-400 hover:text-yellow-600 transition-colors flex items-center gap-1"
       >
         <svg
