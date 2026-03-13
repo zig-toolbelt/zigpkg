@@ -49,7 +49,7 @@
     "clsx": "^2.1.1",
     "drizzle-kit": "^0.31.8",
     "drizzle-orm": "^0.45.0",
-    "lucide-react": "^0.563.0",
+    "lucide-svelte": "^0.577.0",
     "postgres": "^3.4.7",
     "sitemap": "^9.0.1",
     "tailwind-merge": "^3.4.0",

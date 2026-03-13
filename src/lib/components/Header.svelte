@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { Search, Github, Sun } from 'lucide-svelte';
 
   let query = $state('');
 
@@ -17,14 +18,10 @@
       <!-- Logo & Nav -->
       <div class="flex items-center gap-8">
         <a href="/" class="flex items-center gap-2 group">
-          <div
-            class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-lg shadow-sm group-hover:rotate-3 transition-transform"
-          >
+          <div class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-lg shadow-sm group-hover:rotate-3 transition-transform">
             ZIG
           </div>
-          <span class="text-xl font-bold tracking-tight text-slate-900"
-            >packages</span
-          >
+          <span class="text-xl font-bold tracking-tight text-slate-900">packages</span>
         </a>
         <a href="/packages/" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
           Packages
@@ -32,23 +29,21 @@
       </div>
 
       <!-- Search -->
-      <form onsubmit={handleSearch} class="hidden md:flex items-center gap-2 flex-1 max-w-sm mx-8">
+      <form onsubmit={handleSearch} class="flex items-center flex-1 max-w-sm">
         <div class="relative flex-1">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Search class="h-4 w-4 text-slate-400" />
           </div>
           <input
             bind:value={query}
             type="search"
             placeholder="Search packages..."
-            class="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-xl bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+            class="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-l-xl bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
           />
         </div>
         <button
           type="submit"
-          class="px-4 py-2 rounded-xl bg-yellow-400 text-slate-900 text-sm font-semibold hover:bg-yellow-500 transition-colors shrink-0"
+          class="px-4 py-2 rounded-r-xl bg-yellow-400 text-slate-900 text-sm font-semibold hover:bg-yellow-500 transition-colors shrink-0 border border-l-0 border-amber-400 cursor-pointer"
         >
           Search
         </button>
@@ -64,13 +59,7 @@
             class="text-slate-500 hover:text-slate-900 transition-colors"
           >
             <span class="sr-only">GitHub</span>
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
-              ><path
-                fill-rule="evenodd"
-                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                clip-rule="evenodd"
-              /></svg
-            >
+            <Github class="w-5 h-5" />
           </a>
           <a
             href="#"
@@ -89,20 +78,7 @@
           class="text-slate-500 hover:text-amber-500 transition-colors"
           aria-label="Toggle Theme"
         >
-          <!-- Sun Icon for Light Mode -->
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-            />
-          </svg>
+          <Sun class="w-5 h-5" />
         </button>
       </div>
     </div>
