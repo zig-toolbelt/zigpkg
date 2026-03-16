@@ -8,6 +8,8 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+.zig-cache
+zig-out
 
 # OS
 .DS_Store
@@ -26,3 +28,6 @@ vite.config.ts.timestamp-*
 # Paraglide
 src/lib/paraglide
 project.inlang/cache/
+
+# Go
+jobs/sync/sync

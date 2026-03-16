@@ -5,8 +5,6 @@ import {
 	getRecentlyUpdated,
 	getStats,
 } from '$lib/server/packages/queries';
-import { syncRepositories, shouldSync } from '$lib/server/github/sync';
-
 function formatNumber(num: number): string {
 	if (num >= 1000000) {
 		return (num / 1000000).toFixed(1) + 'M';
@@ -18,18 +16,6 @@ function formatNumber(num: number): string {
 }
 
 export const load: PageServerLoad = async ({ setHeaders }) => {
-	// Check if we need to sync (trigger in background, don't block page load)
-	const needsLibrarySync = await shouldSync('zig-package');
-	const needsProgramSync = await shouldSync('zig-program');
-
-	if (needsLibrarySync || needsProgramSync) {
-		// Trigger background sync (non-blocking)
-		Promise.allSettled([
-			needsLibrarySync ? syncRepositories('zig-package') : Promise.resolve(),
-			needsProgramSync ? syncRepositories('zig-program') : Promise.resolve()
-		]).catch(console.error);
-	}
-
 	// Fetch data from cache (database)
 	const [popularPackages, newPackages, recentlyUpdated, stats] = await Promise.all([
 		getMostPopular(6),
