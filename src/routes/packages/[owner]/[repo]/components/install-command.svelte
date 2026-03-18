@@ -25,7 +25,7 @@
     <div
       class="bg-slate-900 rounded-xl px-4 py-3 font-mono text-sm text-slate-100 overflow-x-auto"
     >
-      <span class="text-slate-500 select-none">$ </span>zig fetch --save
+      <span class="text-slate-500 select-none">$&nbsp;</span>zig fetch --save
       <span class="text-yellow-300"
         >git+{repositoryUrl}{version !== "latest" ? "#" + version : ""}</span
       >

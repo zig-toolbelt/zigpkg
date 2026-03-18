@@ -1,3 +1,4 @@
+import { marked } from 'marked';
 import { env } from '$env/dynamic/private';
 import { parseZonFile } from '$lib/server/packages/zon-parser';
 import { updatePackageContent } from '$lib/server/packages/queries';
@@ -48,7 +49,8 @@ async function fetchFromGitHub(pkg: PackageWithContent, githubClient: GitHubClie
 		githubClient.getFileContent(pkg.owner, pkg.name, 'build.zig.zon')
 	]);
 
-	let readmeHtml = readme.status === 'fulfilled' ? readme.value : null;
+	const readmeRaw = readme.status === 'fulfilled' ? readme.value : null;
+	let readmeHtml = readmeRaw ? String(await marked(readmeRaw, { gfm: true })) : null;
 	if (readmeHtml) {
 		readmeHtml = rewriteRelativeUrls(readmeHtml, pkg.owner, pkg.name);
 	}

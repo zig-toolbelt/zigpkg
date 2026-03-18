@@ -36,7 +36,7 @@ export class GitHubClient {
     const response = await fetch(url, {
       headers: {
         ...this.getHeaders(),
-        Accept: "application/vnd.github.html+json",
+        Accept: "application/vnd.github.raw+json",
       },
     });
 
