@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { Search, Github, Sun } from 'lucide-svelte';
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
+  import { Search, Github, Sun } from "lucide-svelte";
 
-  let query = $state('');
+  let query = $state("");
 
   function handleSearch(e: Event) {
     e.preventDefault();
-    goto('/search?q=' + encodeURIComponent(query));
+    goto("/search?q=" + encodeURIComponent(query));
   }
 </script>
 
@@ -18,39 +19,56 @@
       <!-- Logo & Nav -->
       <div class="flex items-center gap-8">
         <a href="/" class="flex items-center gap-2 group">
-          <div class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-lg shadow-sm group-hover:rotate-3 transition-transform">
+          <div
+            class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-lg shadow-sm group-hover:rotate-3 transition-transform"
+          >
             ZIG
           </div>
-          <span class="text-xl font-bold tracking-tight text-slate-900">packages</span>
-        </a>
-        <a href="/packages/" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-          Packages
+          <span class="text-xl font-bold tracking-tight text-slate-900"
+            >packages</span
+          >
         </a>
       </div>
 
       <!-- Search -->
-      <form onsubmit={handleSearch} class="flex items-center flex-1 max-w-sm">
-        <div class="relative flex-1">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search class="h-4 w-4 text-slate-400" />
+      {#if $page.url.pathname !== "/"}
+        <form onsubmit={handleSearch} class="flex items-center flex-1 max-w-sm">
+          <div class="relative flex-1">
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <Search class="h-4 w-4 text-slate-400" />
+            </div>
+            <input
+              bind:value={query}
+              type="search"
+              placeholder="Search packages..."
+              class="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-l-xl bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
+            />
           </div>
-          <input
-            bind:value={query}
-            type="search"
-            placeholder="Search packages..."
-            class="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-l-xl bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
-          />
-        </div>
-        <button
-          type="submit"
-          class="px-4 py-2 rounded-r-xl bg-yellow-400 text-slate-900 text-sm font-semibold hover:bg-yellow-500 transition-colors shrink-0 border border-l-0 border-amber-400 cursor-pointer"
-        >
-          Search
-        </button>
-      </form>
+          <button
+            type="submit"
+            class="px-4 py-2 rounded-r-xl bg-yellow-400 text-slate-900 text-sm font-semibold hover:bg-yellow-500 transition-colors shrink-0 border border-l-0 border-amber-400 cursor-pointer"
+          >
+            Search
+          </button>
+        </form>
+      {/if}
 
       <!-- Right Side: Socials & Theme Toggle -->
       <div class="flex items-center gap-4">
+        <nav class="border-r border-gray-200 pr-4">
+          <ul>
+            <li>
+              <a
+                href="/packages/"
+                class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Packages
+              </a>
+            </li>
+          </ul>
+        </nav>
         <div
           class="hidden sm:flex items-center gap-3 border-r border-gray-200 pr-4"
         >
