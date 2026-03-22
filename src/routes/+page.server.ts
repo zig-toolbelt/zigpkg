@@ -1,66 +1,33 @@
 import type { PageServerLoad } from './$types';
-import {
-	getMostPopular,
-	getNewPackages,
-	getRecentlyUpdated,
-	getStats,
-} from '$lib/server/packages/queries';
-function formatNumber(num: number): string {
-	if (num >= 1000000) {
-		return (num / 1000000).toFixed(1) + 'M';
-	}
-	if (num >= 1000) {
-		return (num / 1000).toFixed(1) + 'K';
-	}
-	return num.toString();
-}
+import { getPackages, getStats } from '$lib/server/packages/queries';
+import type { SortOption } from '$lib/server/packages/queries';
 
-export const load: PageServerLoad = async ({ setHeaders }) => {
-	// Fetch data from cache (database)
-	const [popularPackages, newPackages, recentlyUpdated, stats] = await Promise.all([
-		getMostPopular(6),
-		getNewPackages(4),
-		getRecentlyUpdated(4),
+export const load: PageServerLoad = async ({ url, setHeaders }) => {
+	const sort = (url.searchParams.get('sort') ?? 'new') as SortOption;
+	const validSorts: SortOption[] = ['new', 'stars', 'name'];
+	const safeSort: SortOption = validSorts.includes(sort) ? sort : 'new';
+
+	const [pkgs, stats] = await Promise.all([
+		getPackages({ sort: safeSort, limit: 18 }),
 		getStats()
 	]);
 
-	// Set cache headers for CDN/browser caching
 	setHeaders({
 		'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600'
 	});
 
 	return {
-		popularPackages: popularPackages.map((pkg) => ({
+		packages: pkgs.map((pkg) => ({
 			name: pkg.name,
 			fullName: pkg.fullName,
 			owner: pkg.owner,
-			description: pkg.description || '',
-			version: pkg.version || 'latest',
+			description: pkg.description ?? '',
+			version: pkg.version ?? 'latest',
 			stars: pkg.stars,
 			openIssues: pkg.openIssues,
 			pushedAt: pkg.pushedAt.toISOString()
 		})),
-		newPackages: newPackages.map((pkg) => ({
-			name: pkg.name,
-			fullName: pkg.fullName,
-			owner: pkg.owner,
-			description: pkg.description || '',
-			version: pkg.version || 'latest',
-			stars: pkg.stars,
-			openIssues: pkg.openIssues,
-			pushedAt: pkg.pushedAt.toISOString(),
-			isNew: true
-		})),
-		recentlyUpdated: recentlyUpdated.map((pkg) => ({
-			name: pkg.name,
-			fullName: pkg.fullName,
-			owner: pkg.owner,
-			description: pkg.description || '',
-			version: pkg.version || 'latest',
-			stars: pkg.stars,
-			openIssues: pkg.openIssues,
-			pushedAt: pkg.pushedAt.toISOString()
-		})),
+		sort: safeSort,
 		stats: {
 			totalPackages: stats?.totalPackages ?? 0,
 			totalLibraries: stats?.totalLibraries ?? 0,

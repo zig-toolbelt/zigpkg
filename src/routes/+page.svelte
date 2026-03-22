@@ -1,34 +1,14 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { formatNumber } from "$lib/utils/formatNumber";
-  import { SvelteSet } from "svelte/reactivity";
   import PackageCard from '$lib/components/PackageCard.svelte';
   import { Search, ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-svelte';
 
   let { data } = $props();
 
-  let sortBy = $state<'stars' | 'name'>('stars');
   let sortAsc = $state(false);
 
-  const allPackages = $derived.by(() => {
-    const seen = new SvelteSet<string>();
-    const deduped = [
-      ...data.popularPackages,
-      ...data.newPackages,
-      ...data.recentlyUpdated,
-    ].filter((pkg) => {
-      if (seen.has(pkg.fullName)) return false;
-      seen.add(pkg.fullName);
-      return true;
-    });
-
-    return deduped.sort((a, b) => {
-      const cmp = sortBy === 'stars'
-        ? a.stars - b.stars
-        : a.name.localeCompare(b.name);
-      return sortAsc ? cmp : -cmp;
-    });
-  });
+  const packages = $derived(sortAsc ? [...data.packages].reverse() : data.packages);
 
   let searchQuery = $state('');
 
@@ -131,13 +111,18 @@
     <div class="flex items-center gap-3 w-full md:w-auto">
       <div class="flex bg-gray-100/50 p-1.5 rounded-xl border border-gray-200">
         <button
-          onclick={() => { sortBy = 'stars'; }}
-          class={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors ${sortBy === 'stars' ? 'bg-white text-slate-900 shadow-sm border border-gray-100 ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-900'}`}
+          onclick={() => goto('?sort=new')}
+          class={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors ${data.sort === 'new' ? 'bg-white text-slate-900 shadow-sm border border-gray-100 ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-900'}`}
+          >Date</button
+        >
+        <button
+          onclick={() => goto('?sort=stars')}
+          class={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors ${data.sort === 'stars' ? 'bg-white text-slate-900 shadow-sm border border-gray-100 ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-900'}`}
           >Stars</button
         >
         <button
-          onclick={() => { sortBy = 'name'; }}
-          class={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors ${sortBy === 'name' ? 'bg-white text-slate-900 shadow-sm border border-gray-100 ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-900'}`}
+          onclick={() => goto('?sort=name')}
+          class={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-colors ${data.sort === 'name' ? 'bg-white text-slate-900 shadow-sm border border-gray-100 ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-900'}`}
           >Name</button
         >
       </div>
@@ -157,7 +142,7 @@
 
   <!-- Packages Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {#each allPackages as pkg (pkg.fullName)}
+    {#each packages as pkg (pkg.fullName)}
       <PackageCard {...pkg} />
     {/each}
   </div>

@@ -45,6 +45,8 @@ function getSortColumn(sort: SortOption) {
 			return desc(packages.stars);
 		case 'new':
 			return desc(packages.createdAt);
+		case 'updated':
+			return desc(packages.pushedAt);
 		case 'name':
 			return packages.name;
 		default:
