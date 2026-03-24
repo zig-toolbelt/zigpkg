@@ -13,7 +13,7 @@
   <div class="flex flex-wrap gap-2">
     {#each items as topic (topic)}
       <a
-        href="/packages?search={topic}"
+        href="/search?q={encodeURIComponent(topic)}"
         class="text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-50 text-slate-600 border border-gray-100 hover:bg-yellow-50 hover:text-yellow-700 hover:border-yellow-200 transition-colors"
         >{topic}</a
       >

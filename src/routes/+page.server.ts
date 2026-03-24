@@ -25,7 +25,8 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
 			version: pkg.version ?? 'latest',
 			stars: pkg.stars,
 			openIssues: pkg.openIssues,
-			pushedAt: pkg.pushedAt.toISOString()
+			pushedAt: pkg.pushedAt.toISOString(),
+			repositoryUrl: pkg.repositoryUrl
 		})),
 		sort: safeSort,
 		stats: {

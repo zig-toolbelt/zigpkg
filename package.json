@@ -44,8 +44,6 @@
     "vitest-browser-svelte": "^2.0.1"
   },
   "dependencies": {
-    "@radix-ui/react-separator": "^1.1.8",
-    "@radix-ui/react-slot": "^1.2.4",
     "bits-ui": "^2.15.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

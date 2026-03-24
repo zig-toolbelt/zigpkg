@@ -3,7 +3,7 @@
   import { Check, Copy, Star, CircleAlert, Calendar } from 'lucide-svelte';
 
   type Props = {
-    name: string; 
+    name: string;
     stars: number;
     description: string;
     fullName: string;
@@ -11,23 +11,21 @@
     owner: string;
     pushedAt: string;
     openIssues: number;
+    repositoryUrl: string;
   };
 
   let copiedPkg = $state<string | null>(null);
 
   async function copyFetchCommand(
-    owner: string,
-    name: string,
+    fullName: string,
+    repositoryUrl: string,
     version: string,
   ) {
-    const archivePath =
-      version === "latest"
-        ? "archive/HEAD.tar.gz"
-        : `archive/refs/tags/${version}.tar.gz`;
-    const url = `https://github.com/${owner}/${name}/${archivePath}`;
-    const command = `zig fetch --save ${url}`;
+    const command = version === "latest"
+      ? `zig fetch --save git+${repositoryUrl}`
+      : `zig fetch --save git+${repositoryUrl}#${version}`;
     await navigator.clipboard.writeText(command);
-    copiedPkg = `${owner}/${name}`;
+    copiedPkg = fullName;
     setTimeout(() => {
       copiedPkg = null;
     }, 2000);
@@ -49,7 +47,7 @@
     return `${diffYears} years ago`;
   }
 
-  let { name, fullName, version, owner, stars, openIssues, pushedAt, description }: Props = $props();
+  let { name, fullName, version, owner, stars, openIssues, pushedAt, description, repositoryUrl }: Props = $props();
 </script>
 
 <div
@@ -75,11 +73,11 @@
         {version}
       </span>
       <button
-        onclick={() => copyFetchCommand(owner, name, version)}
+        onclick={() => copyFetchCommand(fullName, repositoryUrl, version)}
         class="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-gray-100 transition-colors"
         title="Copy zig fetch command"
       >
-        {#if copiedPkg === `${owner}/${name}`}
+        {#if copiedPkg === fullName}
           <Check class="w-3.5 h-3.5 text-green-500" />
         {:else}
           <Copy class="w-3.5 h-3.5" />

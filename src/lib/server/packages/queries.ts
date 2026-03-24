@@ -5,6 +5,10 @@ import type { PackageType } from '$lib/types/package';
 
 export type SortOption = 'stars' | 'updated' | 'new' | 'name';
 
+function escapeIlike(str: string): string {
+	return str.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+}
+
 // Flat package row with owner info joined from users table
 const packageSelect = {
 	id: packages.id,
@@ -63,8 +67,9 @@ function buildConditions(options: QueryOptions) {
 	}
 
 	if (search) {
+		const escaped = escapeIlike(search);
 		conditions.push(
-			or(ilike(packages.name, `%${search}%`), ilike(packages.description, `%${search}%`))
+			or(ilike(packages.name, `%${escaped}%`), ilike(packages.description, `%${escaped}%`))
 		);
 	}
 

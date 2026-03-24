@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
-  import { Search, Github, Sun } from "lucide-svelte";
+  import { Search, Github } from "lucide-svelte";
 
   let query = $state("");
 
@@ -87,12 +87,6 @@
           </a>
         </div>
 
-        <button
-          class="text-slate-500 hover:text-amber-500 transition-colors"
-          aria-label="Toggle Theme"
-        >
-          <Sun class="w-5 h-5" />
-        </button>
       </div>
     </div>
   </div>

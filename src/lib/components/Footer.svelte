@@ -16,7 +16,6 @@
     ],
     ecosystem: [
       { label: "Packages", href: "/packages" },
-      { label: "Release Notes", href: "/releases" },
     ],
     legal: [
       { label: "Privacy Policy", href: "/privacy" },
