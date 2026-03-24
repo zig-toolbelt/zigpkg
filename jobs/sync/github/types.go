@@ -12,7 +12,8 @@ type graphqlError struct {
 }
 
 type graphqlData struct {
-	Search SearchPage `json:"search"`
+	Search     SearchPage `json:"search"`
+	Repository Repo       `json:"repository"`
 }
 
 type SearchPage struct {

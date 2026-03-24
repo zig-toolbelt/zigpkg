@@ -12,6 +12,31 @@ import (
 
 var graphqlURL = "https://api.github.com/graphql"
 
+const repoQuery = `
+query($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    databaseId
+    name
+    nameWithOwner
+    owner { login avatarUrl ... on User { databaseId } ... on Organization { databaseId } }
+    description
+    url
+    homepageUrl
+    stargazerCount
+    forkCount
+    issues(states: OPEN) { totalCount }
+    licenseInfo { spdxId }
+    repositoryTopics(first: 20) { nodes { topic { name } } }
+    createdAt
+    updatedAt
+    pushedAt
+    refs(refPrefix: "refs/tags/", orderBy: {field: TAG_COMMIT_DATE, direction: DESC}, first: 1) {
+      nodes { name }
+    }
+  }
+}
+`
+
 const searchQuery = `
 query($query: String!, $after: String) {
   search(query: $query, type: REPOSITORY, first: 25, after: $after) {
@@ -61,13 +86,13 @@ func NewClient(token string) *Client {
 	}
 }
 
-func (c *Client) graphql(variables map[string]any, out any) error {
+func (c *Client) graphql(query string, variables map[string]any, out any) error {
 	if c.rateLimitRemaining == 0 && time.Now().Unix() < c.rateLimitReset {
 		return fmt.Errorf("rate limited until %s", time.Unix(c.rateLimitReset, 0))
 	}
 
 	body, err := json.Marshal(map[string]any{
-		"query":     searchQuery,
+		"query":     query,
 		"variables": variables,
 	})
 	if err != nil {
@@ -129,8 +154,21 @@ func (c *Client) SearchPage(topic, cursor string) (*SearchPage, error) {
 	}
 
 	var data graphqlData
-	if err := c.graphql(vars, &data); err != nil {
+	if err := c.graphql(searchQuery, vars, &data); err != nil {
 		return nil, err
 	}
 	return &data.Search, nil
+}
+
+// GetRepo fetches a single repository by owner and name.
+func (c *Client) GetRepo(owner, name string) (*Repo, error) {
+	vars := map[string]any{
+		"owner": owner,
+		"name":  name,
+	}
+	var data graphqlData
+	if err := c.graphql(repoQuery, vars, &data); err != nil {
+		return nil, err
+	}
+	return &data.Repository, nil
 }
