@@ -1,5 +1,7 @@
 package github
 
+import "time"
+
 // GraphQL response structures
 
 type graphqlResponse struct {
@@ -28,15 +30,15 @@ type PageInfo struct {
 }
 
 type Repo struct {
-	DatabaseID int64   `json:"databaseId"`
-	Name       string  `json:"name"`
-	NameWithOwner string `json:"nameWithOwner"`
-	Owner      Owner   `json:"owner"`
-	Description *string `json:"description"`
-	URL        string  `json:"url"`
-	HomepageURL *string `json:"homepageUrl"`
-	StargazerCount int32 `json:"stargazerCount"`
-	ForkCount      int32 `json:"forkCount"`
+	DatabaseID    int64   `json:"databaseId"`
+	Name          string  `json:"name"`
+	NameWithOwner string  `json:"nameWithOwner"`
+	Owner         Owner   `json:"owner"`
+	Description   *string `json:"description"`
+	URL           string  `json:"url"`
+	HomepageURL   *string `json:"homepageUrl"`
+	StargazerCount int32  `json:"stargazerCount"`
+	ForkCount      int32  `json:"forkCount"`
 	Issues         struct {
 		TotalCount int32 `json:"totalCount"`
 	} `json:"issues"`
@@ -50,9 +52,9 @@ type Repo struct {
 			} `json:"topic"`
 		} `json:"nodes"`
 	} `json:"repositoryTopics"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
-	PushedAt  string `json:"pushedAt"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	PushedAt  time.Time `json:"pushedAt"`
 	Refs      struct {
 		Nodes []struct {
 			Name string `json:"name"`

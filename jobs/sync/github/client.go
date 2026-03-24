@@ -2,6 +2,7 @@ package github
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,11 +11,7 @@ import (
 	"time"
 )
 
-var graphqlURL = "https://api.github.com/graphql"
-
-const repoQuery = `
-query($owner: String!, $name: String!) {
-  repository(owner: $owner, name: $name) {
+const repoFields = `
     databaseId
     name
     nameWithOwner
@@ -33,45 +30,24 @@ query($owner: String!, $name: String!) {
     refs(refPrefix: "refs/tags/", orderBy: {field: TAG_COMMIT_DATE, direction: DESC}, first: 1) {
       nodes { name }
     }
-  }
-}
 `
 
-const searchQuery = `
-query($query: String!, $after: String) {
+const repoQuery = `query($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {` + repoFields + `}
+}`
+
+const searchQuery = `query($query: String!, $after: String) {
   search(query: $query, type: REPOSITORY, first: 25, after: $after) {
     repositoryCount
-    pageInfo {
-      endCursor
-      hasNextPage
-    }
-    nodes {
-      ... on Repository {
-        databaseId
-        name
-        nameWithOwner
-        owner { login avatarUrl ... on User { databaseId } ... on Organization { databaseId } }
-        description
-        url
-        homepageUrl
-        stargazerCount
-        forkCount
-        issues(states: OPEN) { totalCount }
-        licenseInfo { spdxId }
-        repositoryTopics(first: 20) { nodes { topic { name } } }
-        createdAt
-        updatedAt
-        pushedAt
-        refs(refPrefix: "refs/tags/", orderBy: {field: TAG_COMMIT_DATE, direction: DESC}, first: 1) {
-          nodes { name }
-        }
-      }
-    }
+    pageInfo { endCursor hasNextPage }
+    nodes { ... on Repository {` + repoFields + `} }
   }
-}
-`
+}`
 
+// Client is a GitHub GraphQL API client.
+// It is not safe for concurrent use.
 type Client struct {
+	baseURL            string
 	http               *http.Client
 	token              string
 	rateLimitRemaining int
@@ -80,15 +56,16 @@ type Client struct {
 
 func NewClient(token string) *Client {
 	return &Client{
+		baseURL:            "https://api.github.com/graphql",
 		http:               &http.Client{Timeout: 30 * time.Second},
 		token:              token,
 		rateLimitRemaining: 30,
 	}
 }
 
-func (c *Client) graphql(query string, variables map[string]any, out any) error {
+func (c *Client) graphql(ctx context.Context, query string, variables map[string]any) (graphqlData, error) {
 	if c.rateLimitRemaining == 0 && time.Now().Unix() < c.rateLimitReset {
-		return fmt.Errorf("rate limited until %s", time.Unix(c.rateLimitReset, 0))
+		return graphqlData{}, fmt.Errorf("rate limited until %s", time.Unix(c.rateLimitReset, 0))
 	}
 
 	body, err := json.Marshal(map[string]any{
@@ -96,12 +73,12 @@ func (c *Client) graphql(query string, variables map[string]any, out any) error 
 		"variables": variables,
 	})
 	if err != nil {
-		return err
+		return graphqlData{}, err
 	}
 
-	req, err := http.NewRequest("POST", graphqlURL, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewReader(body))
 	if err != nil {
-		return err
+		return graphqlData{}, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
@@ -111,7 +88,7 @@ func (c *Client) graphql(query string, variables map[string]any, out any) error 
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return err
+		return graphqlData{}, err
 	}
 	defer resp.Body.Close()
 
@@ -123,29 +100,24 @@ func (c *Client) graphql(query string, variables map[string]any, out any) error 
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("github graphql: status %d", resp.StatusCode)
-	}
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
+		errBody, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		return graphqlData{}, fmt.Errorf("github graphql: status %d: %s", resp.StatusCode, errBody)
 	}
 
 	var result graphqlResponse
-	if err := json.Unmarshal(respBody, &result); err != nil {
-		return err
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return graphqlData{}, err
 	}
 	if len(result.Errors) > 0 {
-		return fmt.Errorf("github graphql: %s", result.Errors[0].Message)
+		return graphqlData{}, fmt.Errorf("github graphql: %s", result.Errors[0].Message)
 	}
 
-	*out.(*graphqlData) = result.Data
-	return nil
+	return result.Data, nil
 }
 
 // SearchPage fetches one page of repositories for the given topic.
 // Pass an empty cursor for the first page.
-func (c *Client) SearchPage(topic, cursor string) (*SearchPage, error) {
+func (c *Client) SearchPage(ctx context.Context, topic, cursor string) (*SearchPage, error) {
 	vars := map[string]any{
 		"query": "topic:" + topic + " sort:stars",
 	}
@@ -153,21 +125,21 @@ func (c *Client) SearchPage(topic, cursor string) (*SearchPage, error) {
 		vars["after"] = cursor
 	}
 
-	var data graphqlData
-	if err := c.graphql(searchQuery, vars, &data); err != nil {
+	data, err := c.graphql(ctx, searchQuery, vars)
+	if err != nil {
 		return nil, err
 	}
 	return &data.Search, nil
 }
 
 // GetRepo fetches a single repository by owner and name.
-func (c *Client) GetRepo(owner, name string) (*Repo, error) {
+func (c *Client) GetRepo(ctx context.Context, owner, name string) (*Repo, error) {
 	vars := map[string]any{
 		"owner": owner,
 		"name":  name,
 	}
-	var data graphqlData
-	if err := c.graphql(repoQuery, vars, &data); err != nil {
+	data, err := c.graphql(ctx, repoQuery, vars)
+	if err != nil {
 		return nil, err
 	}
 	return &data.Repository, nil
