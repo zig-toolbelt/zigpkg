@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronLeft, Activity, Github } from "lucide-svelte";
+  import { ChevronLeft, Github } from "lucide-svelte";
   import Author from "./components/author.svelte";
   import Topics from "./components/topics.svelte";
   import InstallCommand from "./components/install-command.svelte";
@@ -10,6 +10,9 @@
   import CodeTab from "./components/tabs/code-tab.svelte";
   import VersionsTab from "./components/tabs/versions-tab.svelte";
   import DependenciesTab from "./components/tabs/dependencies-tab.svelte";
+
+  import ButtonTab from "./components/tabs/button-tab.svelte";
+  import Activity from "./components/activity.svelte";
 
   let { data } = $props();
 
@@ -30,35 +33,6 @@
     if (daysSinceCommit < 365)
       return `${Math.floor(daysSinceCommit / 30)} months ago`;
     return `${Math.floor(daysSinceCommit / 365)} years ago`;
-  });
-
-  const activity = $derived.by(() => {
-    switch (true) {
-      case daysSinceCommit < 30:
-        return {
-          label: "Active",
-          color: "text-emerald-500",
-          bg: "bg-emerald-50",
-          border: "border-emerald-200",
-          pulse: true,
-        };
-      case daysSinceCommit < 180:
-        return {
-          label: "Moderate",
-          color: "text-amber-500",
-          bg: "bg-amber-50",
-          border: "border-amber-200",
-          pulse: false,
-        };
-      default:
-        return {
-          label: "Inactive",
-          color: "text-slate-400",
-          bg: "bg-slate-50",
-          border: "border-slate-200",
-          pulse: false,
-        };
-    }
   });
 </script>
 
@@ -92,13 +66,7 @@
         >
           {pkg.packageType}
         </div>
-        <div
-          class="text-xs font-medium px-3 py-1 rounded-full bg-green-50 text-green-600 border border-green-200
-          {activity.color} {activity.pulse ? 'animate-pulse' : ''}
-          "
-        >
-          <Activity class="w-4 h-4" />
-        </div>
+        <Activity {daysSinceCommit} />
         <span class="text-slate-300 text-xs">·</span>
         <span class="text-xs text-slate-400">
           Last commit <span class="font-medium text-slate-600">
@@ -124,28 +92,21 @@
 
 <div class="border-b border-gray-200 mb-8">
   <nav class="flex gap-0 -mb-px">
-    <button
+    <ButtonTab
+      active={activeTab === "readme"}
       onclick={() => (activeTab = "readme")}
-      class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors {activeTab ===
-      'readme'
-        ? 'border-yellow-400 text-yellow-700'
-        : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300'}"
-      >Readme</button
     >
-    <button
+      Readme
+    </ButtonTab>
+    <ButtonTab
+      active={activeTab === "code"}
       onclick={() => (activeTab = "code")}
-      class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors {activeTab ===
-      'code'
-        ? 'border-yellow-400 text-yellow-700'
-        : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300'}"
-      >Code</button
     >
-    <button
+      Code
+    </ButtonTab>
+    <ButtonTab
+      active={activeTab === "versions"}
       onclick={() => (activeTab = "versions")}
-      class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 {activeTab ===
-      'versions'
-        ? 'border-yellow-400 text-yellow-700'
-        : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300'}"
     >
       Versions
       {#if data.tags.length > 0}
@@ -155,21 +116,19 @@
           {data.tags.length}
         </span>
       {/if}
-    </button>
-    <button
+    </ButtonTab>
+    <ButtonTab
+      active={activeTab === "dependencies"}
       onclick={() => (activeTab = "dependencies")}
-      class="px-5 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 {activeTab ===
-      'dependencies'
-        ? 'border-yellow-400 text-yellow-700'
-        : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300'}"
-      >Dependencies {#if data.dependencies.length > 0}
+    >
+      Dependencies {#if data.dependencies.length > 0}
         <span
           class="text-xs bg-gray-100 text-slate-500 px-2 py-0.5 rounded-full"
         >
           {data.dependencies.length}</span
         >
       {/if}
-    </button>
+    </ButtonTab>
   </nav>
 </div>
 
