@@ -1,5 +1,6 @@
 <script lang="ts">
   import { formatDate } from "$lib/utils/formatDate.js";
+  import DetailRow from "./detail-row.svelte";
 
   let {
     version,
@@ -16,30 +17,17 @@
   } = $props();
 </script>
 
-<div class="bg-white border border-gray-200 rounded-2xl p-5">
-  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Details</h3>
+<div class="bg-white border border-gray-200 rounded-sm p-5">
+  <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+    Details
+  </h3>
   <div class="space-y-3.5">
-    <div class="flex items-center justify-between">
-      <span class="text-sm text-slate-500">Version</span>
-      <span class="text-sm font-semibold text-slate-900">{version}</span>
-    </div>
-    <div class="border-t border-gray-100 pt-3 flex items-center justify-between">
-      <span class="text-sm text-slate-500">License</span>
-      <span class="text-sm font-semibold text-slate-900">{license || "Unknown"}</span>
-    </div>
+    <DetailRow label="Version" border={false}>{version}</DetailRow>
+    <DetailRow label="License">{license || "Unknown"}</DetailRow>
     {#if zonInfo?.minimumZigVersion}
-      <div class="border-t border-gray-100 pt-3 flex items-center justify-between">
-        <span class="text-sm text-slate-500">Min Zig Version</span>
-        <span class="text-sm font-semibold text-slate-900">{zonInfo.minimumZigVersion}</span>
-      </div>
+      <DetailRow label="Min Zig Version">{zonInfo.minimumZigVersion}</DetailRow>
     {/if}
-    <div class="border-t border-gray-100 pt-3 flex items-center justify-between">
-      <span class="text-sm text-slate-500">Last Updated</span>
-      <span class="text-sm font-semibold text-slate-900">{formatDate(pushedAt)}</span>
-    </div>
-    <div class="border-t border-gray-100 pt-3 flex items-center justify-between">
-      <span class="text-sm text-slate-500">Created</span>
-      <span class="text-sm font-semibold text-slate-900">{formatDate(createdAt)}</span>
-    </div>
+    <DetailRow label="Last Updated">{formatDate(pushedAt)}</DetailRow>
+    <DetailRow label="Created">{formatDate(createdAt)}</DetailRow>
   </div>
 </div>

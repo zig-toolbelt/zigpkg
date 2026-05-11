@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import PackageRow from '$lib/components/PackageRow.svelte';
+	import PackageRow from '$lib/components/package-row.svelte';
 
 	let { data } = $props();
 

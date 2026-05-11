@@ -1,6 +1,10 @@
 import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js';
+import hljsZig from 'highlightjs-zig';
+
+hljs.registerLanguage('zig', hljsZig);
 
 marked.use(markedHighlight({
 	langPrefix: 'hljs language-',
@@ -13,19 +17,9 @@ import { env } from '$env/dynamic/private';
 import { parseZonFile } from '$lib/server/packages/zon-parser';
 import { updatePackageContent } from '$lib/server/packages/queries';
 import type { GitHubClient } from '$lib/server/github/client';
-import type { InferSelectModel } from 'drizzle-orm';
-import type { packageContent } from '$lib/server/db/schema';
+import type { getPackageByFullName } from './queries';
 
-type PackageContentRow = InferSelectModel<typeof packageContent>;
-
-// Shape returned by getPackageByFullName — packages row + owner fields + content
-type PackageWithContent = {
-	id: number;
-	name: string;
-	owner: string;
-	content: PackageContentRow | null;
-	[key: string]: unknown;
-};
+type PackageWithContent = NonNullable<Awaited<ReturnType<typeof getPackageByFullName>>>;
 
 export type PackageContent = {
 	readmeHtml: string | null;
@@ -35,9 +29,7 @@ export type PackageContent = {
 	zonInfo: ReturnType<typeof parseZonFile> | null;
 };
 
-function getContentTtlMs(): number {
-	return parseInt(env.CONTENT_TTL_HOURS ?? '24') * 60 * 60 * 1000;
-}
+const CONTENT_TTL_MS = parseInt(env.CONTENT_TTL_HOURS ?? '24') * 60 * 60 * 1000;
 
 function rewriteRelativeUrls(html: string, owner: string, repo: string): string {
 	html = html.replace(
@@ -47,6 +39,11 @@ function rewriteRelativeUrls(html: string, owner: string, repo: string): string 
 	html = html.replace(
 		/src="(?!https?:\/\/)([^"]+)"/g,
 		`src="https://raw.githubusercontent.com/${owner}/${repo}/main/$1"`
+	);
+	// Rewrite absolute github.com blob URLs in src to raw.githubusercontent.com
+	html = html.replace(
+		/src="https:\/\/github\.com\/([^/]+\/[^/]+)\/blob\/([^"]+)"/g,
+		'src="https://raw.githubusercontent.com/$1/$2"'
 	);
 	return html;
 }
@@ -59,10 +56,14 @@ async function fetchFromGitHub(pkg: PackageWithContent, githubClient: GitHubClie
 		githubClient.getFileContent(pkg.owner, pkg.name, 'build.zig.zon')
 	]);
 
+	const SAFE_GITHUB_NAME = /^[a-zA-Z0-9._-]+$/;
 	const readmeRaw = readme.status === 'fulfilled' ? readme.value : null;
-	let readmeHtml = readmeRaw ? String(await marked(readmeRaw, { gfm: true })) : null;
+	let readmeHtml = readmeRaw ? await marked(readmeRaw, { gfm: true }) : null;
 	if (readmeHtml) {
-		readmeHtml = rewriteRelativeUrls(readmeHtml, pkg.owner, pkg.name);
+		readmeHtml = DOMPurify.sanitize(readmeHtml, { ADD_ATTR: ['align', 'media'] });
+		if (SAFE_GITHUB_NAME.test(pkg.owner) && SAFE_GITHUB_NAME.test(pkg.name)) {
+			readmeHtml = rewriteRelativeUrls(readmeHtml, pkg.owner, pkg.name);
+		}
 	}
 
 	const tagList =
@@ -117,7 +118,7 @@ export async function getPackageContent(
 ): Promise<PackageContent> {
 	const content = pkg.content;
 	const isStale =
-		!content?.lastSync || Date.now() - content.lastSync.getTime() > getContentTtlMs();
+		!content?.lastSync || Date.now() - content.lastSync.getTime() > CONTENT_TTL_MS;
 
 	// Fresh cache — serve immediately
 	if (content?.readme && !isStale) {

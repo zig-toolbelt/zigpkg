@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { locales, localizeHref } from "$lib/paraglide/runtime";
   import favicon from "$lib/assets/favicon.svg";
-  import { Header, Footer } from "$lib/components";
+  import Header from "$lib/components/header.svelte";
+  import Footer from "$lib/components/footer.svelte";
 
   import "./layout.css";
 
@@ -12,13 +12,6 @@
 <svelte:head>
   <link rel="icon" href={favicon} />
   <link rel="canonical" href={page.url.origin + page.url.pathname} />
-  {#each locales as locale}
-    <link
-      rel="alternate"
-      hreflang={locale}
-      href={page.url.origin + localizeHref(page.url.pathname, { locale })}
-    />
-  {/each}
   <title>Zig Package Registry — Find & Share Zig Libraries</title>
 </svelte:head>
 
@@ -28,12 +21,4 @@
     {@render children()}
   </main>
   <Footer />
-</div>
-
-<div style="display:none">
-  {#each locales as locale}
-    <a href={localizeHref(page.url.pathname, { locale })}>
-      {locale}
-    </a>
-  {/each}
 </div>

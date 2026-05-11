@@ -24,28 +24,30 @@ export class GitHubClient {
     return headers;
   }
 
-  async getReadme(owner: string, repo: string): Promise<string | null> {
-    if (
-      this.rateLimitRemaining <= 1 &&
-      Date.now() < this.rateLimitReset * 1000
-    ) {
-      return null;
+  private checkRateLimit(): void {
+    if (this.rateLimitRemaining <= 1 && Date.now() < this.rateLimitReset * 1000) {
+      throw new RateLimitError(new Date(this.rateLimitReset * 1000));
     }
+  }
+
+  private updateRateLimit(response: Response): void {
+    this.rateLimitRemaining = parseInt(response.headers.get("X-RateLimit-Remaining") || "30");
+    this.rateLimitReset = parseInt(response.headers.get("X-RateLimit-Reset") || "0");
+  }
+
+  async getReadme(owner: string, repo: string): Promise<string | null> {
+    this.checkRateLimit();
 
     const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/readme`;
+    this.rateLimitRemaining = Math.max(0, this.rateLimitRemaining - 1);
     const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
       headers: {
         ...this.getHeaders(),
         Accept: "application/vnd.github.raw+json",
       },
     });
-
-    this.rateLimitRemaining = parseInt(
-      response.headers.get("X-RateLimit-Remaining") || "30",
-    );
-    this.rateLimitReset = parseInt(
-      response.headers.get("X-RateLimit-Reset") || "0",
-    );
+    this.updateRateLimit(response);
 
     if (!response.ok) return null;
 
@@ -53,22 +55,15 @@ export class GitHubClient {
   }
 
   async getTags(owner: string, repo: string): Promise<GitHubTag[] | null> {
-    if (
-      this.rateLimitRemaining <= 1 &&
-      Date.now() < this.rateLimitReset * 1000
-    ) {
-      return null;
-    }
+    this.checkRateLimit();
 
     const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/tags?per_page=100`;
-    const response = await fetch(url, { headers: this.getHeaders() });
-
-    this.rateLimitRemaining = parseInt(
-      response.headers.get("X-RateLimit-Remaining") || "30",
-    );
-    this.rateLimitReset = parseInt(
-      response.headers.get("X-RateLimit-Reset") || "0",
-    );
+    this.rateLimitRemaining = Math.max(0, this.rateLimitRemaining - 1);
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: this.getHeaders(),
+    });
+    this.updateRateLimit(response);
 
     if (!response.ok) return null;
 
@@ -80,22 +75,15 @@ export class GitHubClient {
     repo: string,
     path: string = "",
   ): Promise<GitHubContent[] | null> {
-    if (
-      this.rateLimitRemaining <= 1 &&
-      Date.now() < this.rateLimitReset * 1000
-    ) {
-      return null;
-    }
+    this.checkRateLimit();
 
     const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`;
-    const response = await fetch(url, { headers: this.getHeaders() });
-
-    this.rateLimitRemaining = parseInt(
-      response.headers.get("X-RateLimit-Remaining") || "30",
-    );
-    this.rateLimitReset = parseInt(
-      response.headers.get("X-RateLimit-Reset") || "0",
-    );
+    this.rateLimitRemaining = Math.max(0, this.rateLimitRemaining - 1);
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: this.getHeaders(),
+    });
+    this.updateRateLimit(response);
 
     if (!response.ok) return null;
 
@@ -108,27 +96,18 @@ export class GitHubClient {
     repo: string,
     path: string,
   ): Promise<string | null> {
-    if (
-      this.rateLimitRemaining <= 1 &&
-      Date.now() < this.rateLimitReset * 1000
-    ) {
-      return null;
-    }
+    this.checkRateLimit();
 
     const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`;
+    this.rateLimitRemaining = Math.max(0, this.rateLimitRemaining - 1);
     const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
       headers: {
         ...this.getHeaders(),
         Accept: "application/vnd.github.raw+json",
       },
     });
-
-    this.rateLimitRemaining = parseInt(
-      response.headers.get("X-RateLimit-Remaining") || "30",
-    );
-    this.rateLimitReset = parseInt(
-      response.headers.get("X-RateLimit-Reset") || "0",
-    );
+    this.updateRateLimit(response);
 
     if (!response.ok) return null;
 

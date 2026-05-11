@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { formatNumber } from "$lib/utils/formatNumber";
-  import PackageCard from '$lib/components/PackageCard.svelte';
+  import PackageCard from '$lib/components/package-card.svelte';
   import { Search, ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-svelte';
 
   let { data } = $props();

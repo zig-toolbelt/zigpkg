@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatNumber } from "$lib/utils/formatNumber";
-  import { Check, Copy, Star, CircleAlert, Calendar } from 'lucide-svelte';
+  import { Check, Copy, Star, CircleAlert, Calendar } from "lucide-svelte";
 
   type Props = {
     name: string;
@@ -21,9 +21,10 @@
     repositoryUrl: string,
     version: string,
   ) {
-    const command = version === "latest"
-      ? `zig fetch --save git+${repositoryUrl}`
-      : `zig fetch --save git+${repositoryUrl}#${version}`;
+    const command =
+      version === "latest"
+        ? `zig fetch --save git+${repositoryUrl}`
+        : `zig fetch --save git+${repositoryUrl}#${version}`;
     await navigator.clipboard.writeText(command);
     copiedPkg = fullName;
     setTimeout(() => {
@@ -47,11 +48,21 @@
     return `${diffYears} years ago`;
   }
 
-  let { name, fullName, version, owner, stars, openIssues, pushedAt, description, repositoryUrl }: Props = $props();
+  let {
+    name,
+    fullName,
+    version,
+    owner,
+    stars,
+    openIssues,
+    pushedAt,
+    description,
+    repositoryUrl,
+  }: Props = $props();
 </script>
 
 <div
-  class="group relative flex flex-col bg-white border border-gray-200 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 hover:border-yellow-400/50"
+  class="group relative flex flex-col bg-white border border-gray-200 rounded-sm p-6 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 hover:border-yellow-400/50"
 >
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-3">
@@ -63,7 +74,11 @@
       <h2
         class="text-lg font-bold text-slate-900 group-hover:text-yellow-600 transition-colors"
       >
-        <a href={`/packages/${fullName}`}>{fullName.length > 22 ? fullName.slice(0, 22).concat('...') : fullName}</a>
+        <a href={`/packages/${fullName}`}
+          >{fullName.length > 22
+            ? fullName.slice(0, 22).concat("...")
+            : fullName}</a
+        >
       </h2>
     </div>
     <div class="flex items-center gap-1.5">

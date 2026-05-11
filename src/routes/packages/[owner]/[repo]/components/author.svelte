@@ -7,7 +7,7 @@
   let { owner, ownerAvatarUrl }: Props = $props();
 </script>
 
-<div class="bg-white border border-gray-200 rounded-2xl p-5">
+<div class="bg-white border border-gray-200 rounded-sm p-5">
   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
     Owner
   </h3>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import PackageListCard from './PackageListCard.svelte';
+	import PackageListCard from './package-list-card.svelte';
 
 	interface Package {
 		name: string;

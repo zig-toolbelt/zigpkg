@@ -1,14 +1,8 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import { goto } from "$app/navigation";
-  import { Search, Github } from "lucide-svelte";
 
-  let query = $state("");
-
-  function handleSearch(e: Event) {
-    e.preventDefault();
-    goto("/search?q=" + encodeURIComponent(query));
-  }
+  import Logo from "$lib/components/logo.svelte";
+  import SearchBar from "$lib/components/search-bar.svelte";
 </script>
 
 <header
@@ -17,37 +11,11 @@
   <div class="container mx-auto">
     <div class="flex flex-1 h-16 items-center justify-between">
       <!-- Logo & Nav -->
-      <div class="flex items-center gap-8">
-        <a href="/" class="flex items-center gap-2 group">
-          <div
-            class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-lg shadow-sm group-hover:rotate-3 transition-transform"
-          >
-            ZIG
-          </div>
-          <span class="text-xl font-bold tracking-tight text-slate-900"
-            >packages</span
-          >
-        </a>
-      </div>
+      <Logo />
 
       <!-- Search -->
       {#if $page.url.pathname !== "/"}
-        <form onsubmit={handleSearch} class="flex items-center flex-1 max-w-sm">
-          <div class="relative flex-1">
-            <input
-              bind:value={query}
-              type="search"
-              placeholder="Search packages..."
-              class="block w-full pl-9 pr-3 py-2 h-10 border border-gray-200 rounded-l-xl bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all"
-            />
-          </div>
-          <button
-            type="submit"
-            class="px-4 h-10 rounded-r-xl bg-yellow-400 text-slate-900 text-sm font-semibold hover:bg-yellow-500 transition-colors shrink-0 border border-l-0 border-amber-400 cursor-pointer"
-          >
-            <Search class="h-4 w-4 text-slate-900" />
-          </button>
-        </form>
+        <SearchBar />
       {/if}
 
       <!-- Right Side: Socials & Theme Toggle -->
@@ -72,7 +40,7 @@
             class="text-slate-500 hover:text-slate-900 transition-colors"
           >
             <span class="sr-only">GitHub</span>
-            <Github class="w-5 h-5" />
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.562 21.8 24 17.303 24 12c0-6.627-5.373-12-12-12z"/></svg>
           </a>
           <a
             href="https://x.com/i/communities/1830711127354851778"
@@ -86,7 +54,6 @@
             >
           </a>
         </div>
-
       </div>
     </div>
   </div>
