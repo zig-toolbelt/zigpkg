@@ -13,20 +13,3 @@
     <p class="text-slate-400 text-center py-8">README not available.</p>
   {/if}
 </div>
-
-<style>
-  :global(.prose code:not(pre code)) {
-    background: #f1f5f9;
-    padding: 0.125rem 0.375rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-  }
-  :global(.prose code::before),
-  :global(.prose code::after) {
-    content: none;
-  }
-  :global(.prose pre) {
-    border-radius: 0.5rem;
-    padding: 1rem;
-  }
-</style>

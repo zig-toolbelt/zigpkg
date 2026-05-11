@@ -37,9 +37,9 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 			topics,
 			packageType: pkg.packageType,
 			createdAt: pkg.createdAt.toISOString(),
-			updatedAt: pkg.updatedAt.toISOString(),
 			pushedAt: pkg.pushedAt.toISOString()
 		},
+		issuesUrl: `${pkg.repositoryUrl.replace(/\/$/, '')}/issues`,
 		readme: readmeHtml,
 		tags: tagList,
 		files: fileList,

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Activity } from "lucide-svelte";
 
-  let { daysSinceCommit } = $props();
+  let { daysSinceCommit }: { daysSinceCommit: number } = $props();
 
   const activity = $derived.by(() => {
     switch (true) {
@@ -34,9 +34,10 @@
 </script>
 
 <div
-  class="text-xs font-medium px-3 py-1 rounded-full bg-green-50 text-green-600 border border-green-200
-  {activity.color} {activity.pulse ? 'animate-pulse' : ''}
-  "
+  class="text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1
+  {activity.bg} {activity.color}
+  {activity.pulse ? 'animate-pulse' : ''}"
 >
   <Activity class="w-4 h-4" />
+  <span>{activity.label}</span>
 </div>

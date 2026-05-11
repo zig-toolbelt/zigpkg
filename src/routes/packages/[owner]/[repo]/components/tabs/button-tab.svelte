@@ -18,6 +18,8 @@
 
 <button
   {...rest}
+  role="tab"
+  aria-selected={active}
   class="cursor-pointer px-5 py-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 {activeCn}"
 >
   {@render children()}

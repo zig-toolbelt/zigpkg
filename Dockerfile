@@ -44,8 +44,5 @@ COPY --from=builder --chown=app:app /app/scripts ./scripts
 USER app
 EXPOSE 3200
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:3200/ || exit 1
-
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["sh", "-c", "bun scripts/db-create.ts && bun run db:migrate && bun ./build/index.js"]

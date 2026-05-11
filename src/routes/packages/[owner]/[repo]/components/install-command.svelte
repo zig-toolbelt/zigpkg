@@ -10,11 +10,15 @@
   );
 
   async function copyInstall() {
-    await navigator.clipboard.writeText(installCommand);
-    copied = true;
-    setTimeout(() => {
-      copied = false;
-    }, 2000);
+    try {
+      await navigator.clipboard.writeText(installCommand);
+      copied = true;
+      setTimeout(() => {
+        copied = false;
+      }, 2000);
+    } catch {
+      // clipboard unavailable — silently ignore
+    }
   }
 </script>
 
@@ -29,6 +33,8 @@
       <span class="text-yellow-300">> {installCommand}</span>
     </div>
     <button
+      type="button"
+      aria-label="Copy install command"
       onclick={copyInstall}
       class="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors opacity-0 group-hover:opacity-100"
     >
