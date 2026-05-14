@@ -1,24 +1,51 @@
 import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
-import { getPackageByFullName } from '$lib/server/packages/queries';
+import { error, redirect } from '@sveltejs/kit';
+import {
+	getPackageByFullName,
+	getPackageByFullNameCaseInsensitive
+} from '$lib/server/packages/queries';
 import { githubClient } from '$lib/server/github/client';
 import { getPackageContent } from '$lib/server/packages/content';
 
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const fullName = `${params.owner}/${params.repo}`;
-	const pkg = await getPackageByFullName(fullName);
+	let pkg = await getPackageByFullName(fullName);
 
 	if (!pkg) {
+		const alt = await getPackageByFullNameCaseInsensitive(fullName);
+		if (alt) {
+			redirect(301, `/packages/${alt.fullName}`);
+		}
 		error(404, { message: 'Package not found' });
 	}
 
-	const { readmeHtml, tagList, fileList, zonInfo } = await getPackageContent(pkg, githubClient);
+	let readmeHtml: string | null = null;
+	let tagList: { name: string; sha: string }[] = [];
+	let fileList: { name: string; path: string; type: string; size: number; htmlUrl: string | null }[] = [];
+	let zonInfo: Awaited<ReturnType<typeof getPackageContent>>['zonInfo'] = null;
+	let contentDegraded = false;
+
+	try {
+		const content = await getPackageContent(pkg, githubClient);
+		readmeHtml = content.readmeHtml;
+		tagList = content.tagList;
+		fileList = content.fileList;
+		zonInfo = content.zonInfo;
+	} catch (err) {
+		contentDegraded = true;
+		console.error('[packages/[owner]/[repo]] failed to load content', {
+			fullName,
+			message: err instanceof Error ? err.message : String(err)
+		});
+	}
 
 	const topics = pkg.topics ?? [];
 
-	setHeaders({
-		'Cache-Control': 'public, max-age=120, s-maxage=600, stale-while-revalidate=1200'
-	});
+	setHeaders(
+		contentDegraded
+			? { 'Cache-Control': 'no-store' }
+			: { 'Cache-Control': 'public, max-age=120, s-maxage=600, stale-while-revalidate=1200' }
+	);
 
 	return {
 		package: {
@@ -50,6 +77,7 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 					version: zonInfo.version,
 					minimumZigVersion: zonInfo.minimum_zig_version
 				}
-			: null
+			: null,
+		contentDegraded
 	};
 };

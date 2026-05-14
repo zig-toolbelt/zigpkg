@@ -14,6 +14,7 @@
   import ButtonTab from "./components/tabs/button-tab.svelte";
   import Activity from "./components/activity.svelte";
   import { formatRelativeDate } from "$lib/utils/formatRelativeDate";
+  import { buildCanonical } from "$lib/seo";
 
   let { data } = $props();
 
@@ -23,13 +24,40 @@
   const pkg = $derived(data.package);
 
   const commitDate = $derived(formatRelativeDate(pkg.pushedAt));
+
+  const description = $derived(
+    pkg.description ||
+      `${pkg.name} — a Zig ${pkg.packageType} by ${pkg.owner}. View source, install instructions, and documentation on zigpkg.`,
+  );
+  const canonical = $derived(buildCanonical(`/packages/${pkg.fullName}`));
+  const jsonLd = $derived(
+    JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      name: pkg.name,
+      description,
+      programmingLanguage: "Zig",
+      codeRepository: pkg.repositoryUrl,
+      url: canonical,
+      author: { "@type": "Person", name: pkg.owner },
+      dateCreated: pkg.createdAt,
+      dateModified: pkg.pushedAt,
+      license: pkg.license || undefined,
+      keywords: (pkg.topics ?? []).join(", ") || undefined,
+    }).replace(/</g, "\\u003c"),
+  );
 </script>
 
 <svelte:head>
   <title>{pkg.name} - zigpkg</title>
-  {#if pkg.description}
-    <meta name="description" content={pkg.description} />
-  {/if}
+  <meta name="description" content={description} />
+  <meta property="og:title" content={`${pkg.name} — zigpkg`} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:title" content={`${pkg.name} — zigpkg`} />
+  <meta name="twitter:description" content={description} />
+  {@html '<script type="application/ld+json">' + jsonLd + '<\/script>'}
 </svelte:head>
 
 <div>
@@ -78,6 +106,14 @@
     </div>
   </div>
 </div>
+
+{#if data.contentDegraded}
+  <div
+    class="mt-4 mb-4 px-4 py-3 rounded-lg bg-yellow-50 border border-yellow-200 text-sm text-yellow-800"
+  >
+    README, files, and versions are temporarily unavailable. Please try again in a few minutes.
+  </div>
+{/if}
 
 <div class="border-b border-gray-200 mb-8">
   <nav class="flex gap-0 -mb-px" role="tablist">

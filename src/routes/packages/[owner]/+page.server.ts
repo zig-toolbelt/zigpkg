@@ -1,16 +1,24 @@
 import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
-import { getPackages, getFilteredPackageCount } from '$lib/server/packages/queries';
+import { error, redirect } from '@sveltejs/kit';
+import {
+	getPackages,
+	getFilteredPackageCount,
+	getOwnerCanonical
+} from '$lib/server/packages/queries';
 
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const { owner } = params;
 
-	const [pkgs, totalCount] = await Promise.all([
+	let [pkgs, totalCount] = await Promise.all([
 		getPackages({ owner }),
 		getFilteredPackageCount({ owner })
 	]);
 
 	if (totalCount === 0) {
+		const canonical = await getOwnerCanonical(owner);
+		if (canonical && canonical !== owner) {
+			redirect(301, `/packages/${canonical}`);
+		}
 		error(404, { message: 'Owner not found' });
 	}
 
