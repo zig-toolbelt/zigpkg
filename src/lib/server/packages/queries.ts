@@ -164,6 +164,35 @@ export async function getPackageByFullName(fullName: string) {
 	};
 }
 
+export async function getPackageByFullNameCaseInsensitive(fullName: string) {
+	const [result] = await db
+		.select()
+		.from(packages)
+		.innerJoin(users, eq(packages.ownerId, users.id))
+		.leftJoin(packageContent, eq(packages.id, packageContent.packageId))
+		.where(sql`lower(${packages.fullName}) = lower(${fullName})`)
+		.limit(1);
+
+	if (!result) return undefined;
+
+	return {
+		...result.packages,
+		owner: result.users.username,
+		ownerAvatarUrl: result.users.avatarUrl,
+		content: result.package_content
+	};
+}
+
+export async function getOwnerCanonical(owner: string): Promise<string | undefined> {
+	const [result] = await db
+		.select({ username: users.username })
+		.from(users)
+		.where(sql`lower(${users.username}) = lower(${owner})`)
+		.limit(1);
+
+	return result?.username;
+}
+
 export async function getStats() {
 	const [result] = await db
 		.select({
@@ -179,8 +208,22 @@ export async function getStats() {
 
 export async function getAllPackageNames() {
 	return db
-		.select({ name: packages.name, fullName: packages.fullName, updatedAt: packages.updatedAt })
-		.from(packages);
+		.select({
+			name: packages.name,
+			fullName: packages.fullName,
+			updatedAt: packages.updatedAt,
+			ownerUsername: users.username,
+			stars: packages.stars,
+			pushedAt: packages.pushedAt
+		})
+		.from(packages)
+		.innerJoin(users, eq(packages.ownerId, users.id))
+		.where(
+			and(
+				sql`${packages.pushedAt} > now() - interval '6 months'`,
+				sql`${packages.stars} >= 1`
+			)
+		);
 }
 
 export async function updatePackageContent(

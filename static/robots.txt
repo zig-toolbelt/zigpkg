@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /search
+Disallow: /health
 
 Sitemap: https://zigpkg.dev/sitemap.xml

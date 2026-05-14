@@ -3,6 +3,7 @@
   import { formatNumber } from "$lib/utils/formatNumber";
   import PackageCard from '$lib/components/package-card.svelte';
   import { Search, ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-svelte';
+  import { siteUrl } from '$lib/seo';
 
   let { data } = $props();
 
@@ -16,7 +17,23 @@
     e.preventDefault();
     goto('/search?q=' + encodeURIComponent(searchQuery));
   }
+
+  const homeJsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "zigpkg",
+    url: siteUrl(),
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteUrl()}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  }).replace(/</g, "\\u003c");
 </script>
+
+<svelte:head>
+  {@html '<script type="application/ld+json">' + homeJsonLd + '<\/script>'}
+</svelte:head>
 
 <div
   class="text-slate-900 font-sans selection:bg-yellow-200 selection:text-black scroll-smooth"
