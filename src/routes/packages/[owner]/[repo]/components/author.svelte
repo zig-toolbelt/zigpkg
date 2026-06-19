@@ -2,9 +2,10 @@
   type Props = {
     owner: string;
     ownerAvatarUrl: string | null;
+    ownerHtmlUrl: string;
   };
 
-  let { owner, ownerAvatarUrl }: Props = $props();
+  let { owner, ownerAvatarUrl, ownerHtmlUrl }: Props = $props();
 </script>
 
 <div class="bg-white border border-gray-200 rounded-sm p-5">
@@ -12,7 +13,7 @@
     Owner
   </h3>
   <a
-    href="https://github.com/{owner}"
+    href={ownerHtmlUrl}
     target="_blank"
     rel="noopener"
     class="flex items-center gap-3 group"

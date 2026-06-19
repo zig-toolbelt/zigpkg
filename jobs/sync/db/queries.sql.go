@@ -12,35 +12,74 @@ import (
 )
 
 const getSyncMetadata = `-- name: GetSyncMetadata :one
-SELECT id, topic, last_sync_at, total_count, next_sync_at
+SELECT id, source, topic, last_sync_at, total_count, next_sync_at, sync_cursor
 FROM sync_metadata
-WHERE topic = $1
+WHERE source = $1 AND topic = $2
 `
 
-func (q *Queries) GetSyncMetadata(ctx context.Context, topic string) (SyncMetadatum, error) {
-	row := q.db.QueryRow(ctx, getSyncMetadata, topic)
+type GetSyncMetadataParams struct {
+	Source string
+	Topic  string
+}
+
+func (q *Queries) GetSyncMetadata(ctx context.Context, arg GetSyncMetadataParams) (SyncMetadatum, error) {
+	row := q.db.QueryRow(ctx, getSyncMetadata, arg.Source, arg.Topic)
 	var i SyncMetadatum
 	err := row.Scan(
 		&i.ID,
+		&i.Source,
 		&i.Topic,
 		&i.LastSyncAt,
 		&i.TotalCount,
 		&i.NextSyncAt,
+		&i.SyncCursor,
 	)
 	return i, err
 }
 
+const saveSyncCursor = `-- name: SaveSyncCursor :exec
+INSERT INTO sync_metadata (source, topic, last_sync_at, total_count, next_sync_at, sync_cursor)
+VALUES ($1, $2, 'epoch', $3, now() + interval '1 hour', $4)
+ON CONFLICT (source, topic) DO UPDATE SET
+  total_count = EXCLUDED.total_count,
+  sync_cursor = EXCLUDED.sync_cursor
+`
+
+type SaveSyncCursorParams struct {
+	Source     string
+	Topic      string
+	TotalCount pgtype.Int4
+	SyncCursor pgtype.Text
+}
+
+// Checkpoints an in-progress pass: persists the pagination cursor and the
+// running total without bumping the cooldown, so an interrupted run resumes.
+// last_sync_at is only ever advanced by UpsertSyncMetadata on completion; the
+// INSERT branch (a (source, topic)'s first-ever checkpoint) seeds it with
+// 'epoch' so a resumed *first* sync is not mistaken for an incremental pass and
+// truncated by the freshness cutoff. The UPDATE branch deliberately leaves
+// last_sync_at alone, preserving the previous completed pass as the watermark.
+func (q *Queries) SaveSyncCursor(ctx context.Context, arg SaveSyncCursorParams) error {
+	_, err := q.db.Exec(ctx, saveSyncCursor,
+		arg.Source,
+		arg.Topic,
+		arg.TotalCount,
+		arg.SyncCursor,
+	)
+	return err
+}
+
 const upsertPackage = `-- name: UpsertPackage :exec
 INSERT INTO packages (
-  github_id, name, full_name, owner_id,
+  source, source_id, name, full_name, owner_id,
   description, version, stars, forks, open_issues,
   license, homepage, repository_url, topics,
   package_type, created_at, updated_at, pushed_at, cached_at
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8, $9,
-  $10, $11, $12, $13, $14, $15, $16, $17, now()
+  $10, $11, $12, $13, $14, $15, $16, $17, $18, now()
 )
-ON CONFLICT (github_id) DO UPDATE SET
+ON CONFLICT (source, source_id) DO UPDATE SET
   name           = EXCLUDED.name,
   full_name      = EXCLUDED.full_name,
   owner_id       = EXCLUDED.owner_id,
@@ -58,7 +97,8 @@ ON CONFLICT (github_id) DO UPDATE SET
 `
 
 type UpsertPackageParams struct {
-	GithubID      int64
+	Source        string
+	SourceID      int64
 	Name          string
 	FullName      string
 	OwnerID       int32
@@ -70,7 +110,7 @@ type UpsertPackageParams struct {
 	License       pgtype.Text
 	Homepage      pgtype.Text
 	RepositoryUrl string
-	Topics        pgtype.Text
+	Topics        []byte
 	PackageType   string
 	CreatedAt     pgtype.Timestamptz
 	UpdatedAt     pgtype.Timestamptz
@@ -79,7 +119,8 @@ type UpsertPackageParams struct {
 
 func (q *Queries) UpsertPackage(ctx context.Context, arg UpsertPackageParams) error {
 	_, err := q.db.Exec(ctx, upsertPackage,
-		arg.GithubID,
+		arg.Source,
+		arg.SourceID,
 		arg.Name,
 		arg.FullName,
 		arg.OwnerID,
@@ -101,28 +142,31 @@ func (q *Queries) UpsertPackage(ctx context.Context, arg UpsertPackageParams) er
 }
 
 const upsertSyncMetadata = `-- name: UpsertSyncMetadata :exec
-INSERT INTO sync_metadata (topic, last_sync_at, total_count, next_sync_at)
-VALUES ($1, now(), $2, now() + interval '1 hour')
-ON CONFLICT (topic) DO UPDATE SET
+INSERT INTO sync_metadata (source, topic, last_sync_at, total_count, next_sync_at, sync_cursor)
+VALUES ($1, $2, now(), $3, now() + interval '1 hour', NULL)
+ON CONFLICT (source, topic) DO UPDATE SET
   last_sync_at = now(),
   total_count  = EXCLUDED.total_count,
-  next_sync_at = now() + interval '1 hour'
+  next_sync_at = now() + interval '1 hour',
+  sync_cursor  = NULL
 `
 
 type UpsertSyncMetadataParams struct {
+	Source     string
 	Topic      string
 	TotalCount pgtype.Int4
 }
 
+// Marks a (source, topic) pass as complete: bumps the cooldown and clears the cursor.
 func (q *Queries) UpsertSyncMetadata(ctx context.Context, arg UpsertSyncMetadataParams) error {
-	_, err := q.db.Exec(ctx, upsertSyncMetadata, arg.Topic, arg.TotalCount)
+	_, err := q.db.Exec(ctx, upsertSyncMetadata, arg.Source, arg.Topic, arg.TotalCount)
 	return err
 }
 
 const upsertUser = `-- name: UpsertUser :one
-INSERT INTO users (github_id, username, avatar_url, bio, html_url, updated_at)
-VALUES ($1, $2, $3, $4, $5, now())
-ON CONFLICT (github_id) DO UPDATE SET
+INSERT INTO users (source, source_id, username, avatar_url, bio, html_url, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, now())
+ON CONFLICT (source, source_id) DO UPDATE SET
   username   = EXCLUDED.username,
   avatar_url = EXCLUDED.avatar_url,
   bio        = EXCLUDED.bio,
@@ -132,7 +176,8 @@ RETURNING id
 `
 
 type UpsertUserParams struct {
-	GithubID  int64
+	Source    string
+	SourceID  int64
 	Username  string
 	AvatarUrl pgtype.Text
 	Bio       pgtype.Text
@@ -141,7 +186,8 @@ type UpsertUserParams struct {
 
 func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (int32, error) {
 	row := q.db.QueryRow(ctx, upsertUser,
-		arg.GithubID,
+		arg.Source,
+		arg.SourceID,
 		arg.Username,
 		arg.AvatarUrl,
 		arg.Bio,

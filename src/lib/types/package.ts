@@ -2,11 +2,13 @@ export type PackageType = 'library' | 'application';
 
 export interface ZigPackage {
 	id: number;
-	githubId: number;
+	source: string;
+	sourceId: number;
 	name: string;
 	fullName: string;
 	owner: string;
 	ownerAvatarUrl: string | null;
+	ownerHtmlUrl: string | null;
 	description: string | null;
 	version: string;
 	stars: number;

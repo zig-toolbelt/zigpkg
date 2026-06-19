@@ -1,0 +1,1 @@
+ALTER TABLE "sync_metadata" ADD COLUMN "sync_cursor" text;

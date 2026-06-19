@@ -4,18 +4,25 @@ import "time"
 
 // GraphQL response structures
 
-type graphqlResponse struct {
-	Data   graphqlData    `json:"data"`
-	Errors []graphqlError `json:"errors"`
-}
-
 type graphqlError struct {
+	Type    string `json:"type"`
 	Message string `json:"message"`
 }
 
 type graphqlData struct {
 	Search     SearchPage `json:"search"`
 	Repository Repo       `json:"repository"`
+	RateLimit  RateLimit  `json:"rateLimit"`
+}
+
+// RateLimit mirrors the top-level rateLimit block GitHub returns alongside every
+// GraphQL query: the point allowance, this query's cost, the points remaining,
+// and when the window resets. It is the source of truth for adaptive pacing.
+type RateLimit struct {
+	Limit     int       `json:"limit"`
+	Cost      int       `json:"cost"`
+	Remaining int       `json:"remaining"`
+	ResetAt   time.Time `json:"resetAt"`
 }
 
 type SearchPage struct {
@@ -30,15 +37,15 @@ type PageInfo struct {
 }
 
 type Repo struct {
-	DatabaseID    int64   `json:"databaseId"`
-	Name          string  `json:"name"`
-	NameWithOwner string  `json:"nameWithOwner"`
-	Owner         Owner   `json:"owner"`
-	Description   *string `json:"description"`
-	URL           string  `json:"url"`
-	HomepageURL   *string `json:"homepageUrl"`
-	StargazerCount int32  `json:"stargazerCount"`
-	ForkCount      int32  `json:"forkCount"`
+	DatabaseID     int64   `json:"databaseId"`
+	Name           string  `json:"name"`
+	NameWithOwner  string  `json:"nameWithOwner"`
+	Owner          Owner   `json:"owner"`
+	Description    *string `json:"description"`
+	URL            string  `json:"url"`
+	HomepageURL    *string `json:"homepageUrl"`
+	StargazerCount int32   `json:"stargazerCount"`
+	ForkCount      int32   `json:"forkCount"`
 	Issues         struct {
 		TotalCount int32 `json:"totalCount"`
 	} `json:"issues"`

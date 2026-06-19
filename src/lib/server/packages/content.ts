@@ -16,10 +16,12 @@ marked.use(markedHighlight({
 import { env } from '$env/dynamic/private';
 import { parseZonFile } from '$lib/server/packages/zon-parser';
 import { updatePackageContent } from '$lib/server/packages/queries';
-import type { GitHubClient } from '$lib/server/github/client';
+import type { ContentClient } from '$lib/server/content-client';
+import { rawUrl, blobUrl } from '$lib/providers';
 import type { getPackageByFullName } from './queries';
 
 type PackageWithContent = NonNullable<Awaited<ReturnType<typeof getPackageByFullName>>>;
+type PackageContentRow = NonNullable<PackageWithContent['content']>;
 
 export type PackageContent = {
 	readmeHtml: string | null;
@@ -31,38 +33,47 @@ export type PackageContent = {
 
 const CONTENT_TTL_MS = parseInt(env.CONTENT_TTL_HOURS ?? '24') * 60 * 60 * 1000;
 
-function rewriteRelativeUrls(html: string, owner: string, repo: string): string {
+function rewriteRelativeUrls(
+	html: string,
+	source: string,
+	owner: string,
+	repo: string,
+	branch = 'main'
+): string {
 	html = html.replace(
 		/href="(?!https?:\/\/|#|mailto:)([^"]+)"/g,
-		`href="https://github.com/${owner}/${repo}/blob/main/$1"`
+		(_m, path) => `href="${blobUrl(source, owner, repo, branch, path)}"`
 	);
 	html = html.replace(
 		/src="(?!https?:\/\/)([^"]+)"/g,
-		`src="https://raw.githubusercontent.com/${owner}/${repo}/main/$1"`
+		(_m, path) => `src="${rawUrl(source, owner, repo, branch, path)}"`
 	);
 	// Rewrite absolute github.com blob URLs in src to raw.githubusercontent.com
-	html = html.replace(
-		/src="https:\/\/github\.com\/([^/]+\/[^/]+)\/blob\/([^"]+)"/g,
-		'src="https://raw.githubusercontent.com/$1/$2"'
-	);
+	// (GitHub-only: Codeberg READMEs don't embed github.com blob links).
+	if (source !== 'codeberg') {
+		html = html.replace(
+			/src="https:\/\/github\.com\/([^/]+\/[^/]+)\/blob\/([^"]+)"/g,
+			'src="https://raw.githubusercontent.com/$1/$2"'
+		);
+	}
 	return html;
 }
 
-async function fetchFromGitHub(pkg: PackageWithContent, githubClient: GitHubClient): Promise<PackageContent> {
+async function fetchContent(pkg: PackageWithContent, client: ContentClient): Promise<PackageContent> {
 	const [readme, tags, contents, zonContent] = await Promise.allSettled([
-		githubClient.getReadme(pkg.owner, pkg.name),
-		githubClient.getTags(pkg.owner, pkg.name),
-		githubClient.getContents(pkg.owner, pkg.name),
-		githubClient.getFileContent(pkg.owner, pkg.name, 'build.zig.zon')
+		client.getReadme(pkg.owner, pkg.name),
+		client.getTags(pkg.owner, pkg.name),
+		client.getContents(pkg.owner, pkg.name),
+		client.getFileContent(pkg.owner, pkg.name, 'build.zig.zon')
 	]);
 
-	const SAFE_GITHUB_NAME = /^[a-zA-Z0-9._-]+$/;
+	const SAFE_REPO_NAME = /^[a-zA-Z0-9._-]+$/;
 	const readmeRaw = readme.status === 'fulfilled' ? readme.value : null;
 	let readmeHtml = readmeRaw ? await marked(readmeRaw, { gfm: true }) : null;
 	if (readmeHtml) {
 		readmeHtml = DOMPurify.sanitize(readmeHtml, { ADD_ATTR: ['align', 'media'] });
-		if (SAFE_GITHUB_NAME.test(pkg.owner) && SAFE_GITHUB_NAME.test(pkg.name)) {
-			readmeHtml = rewriteRelativeUrls(readmeHtml, pkg.owner, pkg.name);
+		if (SAFE_REPO_NAME.test(pkg.owner) && SAFE_REPO_NAME.test(pkg.name)) {
+			readmeHtml = rewriteRelativeUrls(readmeHtml, pkg.source, pkg.owner, pkg.name);
 		}
 	}
 
@@ -114,7 +125,7 @@ function saveToDb(packageId: number, content: PackageContent): void {
 
 export async function getPackageContent(
 	pkg: PackageWithContent,
-	githubClient: GitHubClient
+	client: ContentClient
 ): Promise<PackageContent> {
 	const content = pkg.content;
 	const isStale =
@@ -127,14 +138,14 @@ export async function getPackageContent(
 
 	// Stale cache — serve old data, refresh in background
 	if (content?.readme && isStale) {
-		fetchFromGitHub(pkg, githubClient)
+		fetchContent(pkg, client)
 			.then((fresh) => saveToDb(pkg.id, fresh))
 			.catch(console.error);
 		return fromCache(content);
 	}
 
 	// No cache — fetch, store, return
-	const fresh = await fetchFromGitHub(pkg, githubClient);
+	const fresh = await fetchContent(pkg, client);
 	saveToDb(pkg.id, fresh);
 	return fresh;
 }

@@ -174,11 +174,20 @@
   </div>
 
   <aside class="w-full lg:w-80 shrink-0 space-y-5">
-    <Author owner={pkg.owner} ownerAvatarUrl={pkg.ownerAvatarUrl} />
+    <Author
+      owner={pkg.owner}
+      ownerAvatarUrl={pkg.ownerAvatarUrl}
+      ownerHtmlUrl={pkg.ownerHtmlUrl}
+    />
     {#if pkg.topics.length > 0}
       <Topics items={pkg.topics} />
     {/if}
-    <PackageLinks repositoryUrl={pkg.repositoryUrl} homepage={pkg.homepage} issuesUrl={data.issuesUrl} />
+    <PackageLinks
+      source={pkg.source}
+      repositoryUrl={pkg.repositoryUrl}
+      homepage={pkg.homepage}
+      issuesUrl={data.issuesUrl}
+    />
     <PackageStats
       stars={pkg.stars}
       forks={pkg.forks}

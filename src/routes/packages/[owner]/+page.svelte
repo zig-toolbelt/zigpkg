@@ -1,23 +1,18 @@
 <script lang="ts">
   import { formatNumber } from "$lib/utils/formatNumber";
   import { Star, CircleAlert, Calendar, Copy, Check } from "lucide-svelte";
+  import { archiveFetchUrl } from "$lib/providers";
 
   let { data } = $props();
 
   let copiedPkg = $state<string | null>(null);
 
-  async function copyFetchCommand(
-    owner: string,
-    name: string,
-    version: string,
-  ) {
-    const archivePath =
-      version === "latest"
-        ? "archive/HEAD.tar.gz"
-        : `archive/refs/tags/${version}.tar.gz`;
-    const url = `https://github.com/${owner}/${name}/${archivePath}`;
+  type PkgCard = (typeof data.packages)[number];
+
+  async function copyFetchCommand(pkg: PkgCard) {
+    const url = archiveFetchUrl(pkg.source, pkg.repositoryUrl, pkg.version);
     await navigator.clipboard.writeText(`zig fetch --save ${url}`);
-    copiedPkg = `${owner}/${name}`;
+    copiedPkg = pkg.fullName;
     setTimeout(() => (copiedPkg = null), 2000);
   }
 
@@ -96,7 +91,7 @@
               {pkg.version}
             </span>
             <button
-              onclick={() => copyFetchCommand(pkg.owner, pkg.name, pkg.version)}
+              onclick={() => copyFetchCommand(pkg)}
               class="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-gray-100 transition-colors"
               title="Copy zig fetch command"
             >

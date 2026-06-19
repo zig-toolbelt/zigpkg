@@ -1,10 +1,18 @@
 <script lang="ts">
   import { ExternalLink, Globe, CircleAlert } from "lucide-svelte";
   let {
+    source,
     repositoryUrl,
     homepage,
     issuesUrl,
-  }: { repositoryUrl: string; homepage: string | null; issuesUrl: string } = $props();
+  }: {
+    source: string;
+    repositoryUrl: string;
+    homepage: string | null;
+    issuesUrl: string;
+  } = $props();
+
+  const sourceLabel = $derived(source === "codeberg" ? "Codeberg" : "GitHub");
 </script>
 
 <div class="bg-white border border-gray-200 rounded-sm p-5 space-y-4">
@@ -19,7 +27,12 @@
       class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-yellow-600 transition-colors"
     >
       <ExternalLink class="w-4 h-4 shrink-0" />
-      Repository
+      <span>Repository</span>
+      <span
+        class="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-gray-100 text-slate-500 border border-gray-200"
+      >
+        {sourceLabel}
+      </span>
     </a>
     {#if homepage}
       <a
