@@ -12,7 +12,8 @@ function escapeIlike(str: string): string {
 // Flat package row with owner info joined from users table
 const packageSelect = {
 	id: packages.id,
-	githubId: packages.githubId,
+	source: packages.source,
+	sourceId: packages.sourceId,
 	name: packages.name,
 	fullName: packages.fullName,
 	owner: users.username,
@@ -160,6 +161,7 @@ export async function getPackageByFullName(fullName: string) {
 		...result.packages,
 		owner: result.users.username,
 		ownerAvatarUrl: result.users.avatarUrl,
+		ownerHtmlUrl: result.users.htmlUrl,
 		content: result.package_content
 	};
 }
@@ -179,6 +181,7 @@ export async function getPackageByFullNameCaseInsensitive(fullName: string) {
 		...result.packages,
 		owner: result.users.username,
 		ownerAvatarUrl: result.users.avatarUrl,
+		ownerHtmlUrl: result.users.htmlUrl,
 		content: result.package_content
 	};
 }

@@ -9,27 +9,40 @@ import {
 	varchar,
 	jsonb,
 	index,
-	check
+	check,
+	unique
 } from 'drizzle-orm/pg-core';
 
-// Users table - GitHub profiles (owners of packages + registered users)
-export const users = pgTable('users', {
-	id: serial('id').primaryKey(),
-	githubId: bigint('github_id', { mode: 'number' }).notNull().unique(),
-	username: varchar('username', { length: 255 }).notNull().unique(),
-	avatarUrl: text('avatar_url'),
-	bio: text('bio'),
-	htmlUrl: text('html_url'),
-	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
-});
+// Users table - package owners + registered users, scoped by source.
+// Identity is (source, source_id): the same numeric id can recur across
+// hosts (GitHub and Codeberg both start at low ids), so uniqueness is
+// per-source rather than global.
+export const users = pgTable(
+	'users',
+	{
+		id: serial('id').primaryKey(),
+		source: varchar('source', { length: 20 }).notNull().default('github'),
+		sourceId: bigint('source_id', { mode: 'number' }).notNull(),
+		username: varchar('username', { length: 255 }).notNull(),
+		avatarUrl: text('avatar_url'),
+		bio: text('bio'),
+		htmlUrl: text('html_url'),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
+	},
+	(table) => [
+		unique('users_source_source_id_unique').on(table.source, table.sourceId),
+		unique('users_source_username_unique').on(table.source, table.username)
+	]
+);
 
-// Packages table - cache for GitHub repositories
+// Packages table - cache for repositories from each source.
 export const packages = pgTable(
 	'packages',
 	{
 		id: serial('id').primaryKey(),
-		githubId: bigint('github_id', { mode: 'number' }).notNull().unique(),
+		source: varchar('source', { length: 20 }).notNull().default('github'),
+		sourceId: bigint('source_id', { mode: 'number' }).notNull(),
 		name: varchar('name', { length: 255 }).notNull(),
 		fullName: varchar('full_name', { length: 512 }).notNull(),
 		ownerId: integer('owner_id')
@@ -51,6 +64,7 @@ export const packages = pgTable(
 		cachedAt: timestamp('cached_at', { withTimezone: true }).defaultNow().notNull()
 	},
 	(table) => [
+		unique('packages_source_source_id_unique').on(table.source, table.sourceId),
 		index('packages_stars_idx').on(table.stars),
 		index('packages_updated_idx').on(table.updatedAt),
 		index('packages_cached_idx').on(table.cachedAt),
@@ -76,11 +90,19 @@ export const packageContent = pgTable('package_content', {
 	lastSync: timestamp('last_sync', { withTimezone: true })
 });
 
-// Sync metadata table - track last sync time per topic
-export const syncMetadata = pgTable('sync_metadata', {
-	id: serial('id').primaryKey(),
-	topic: varchar('topic', { length: 100 }).notNull().unique(),
-	lastSyncAt: timestamp('last_sync_at', { withTimezone: true }).notNull(),
-	totalCount: integer('total_count').default(0),
-	nextSyncAt: timestamp('next_sync_at', { withTimezone: true }).notNull()
-});
+// Sync metadata table - track last sync time per (source, topic)
+export const syncMetadata = pgTable(
+	'sync_metadata',
+	{
+		id: serial('id').primaryKey(),
+		source: varchar('source', { length: 20 }).notNull().default('github'),
+		topic: varchar('topic', { length: 100 }).notNull(),
+		lastSyncAt: timestamp('last_sync_at', { withTimezone: true }).notNull(),
+		totalCount: integer('total_count').default(0),
+		nextSyncAt: timestamp('next_sync_at', { withTimezone: true }).notNull(),
+		// Resume point of an in-progress sync pass, written by the jobs/sync job.
+		// Null when the last pass completed.
+		syncCursor: text('sync_cursor')
+	},
+	(table) => [unique('sync_metadata_source_topic_unique').on(table.source, table.topic)]
+);

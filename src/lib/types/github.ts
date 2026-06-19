@@ -54,5 +54,7 @@ export interface GitHubContent {
 	path: string;
 	type: 'file' | 'dir' | 'symlink' | 'submodule';
 	size: number;
-	html_url: string;
+	// Forgejo may omit the web URL for some entries; the cached file list and
+	// DB column are both nullable, so model it as such here too.
+	html_url: string | null;
 }

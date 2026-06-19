@@ -3,9 +3,11 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 const mockSearchResponse = `{
@@ -121,14 +123,13 @@ func TestSearchPage(t *testing.T) {
 			t.Fatalf("decode body: %v", err)
 		}
 		vars := body["variables"].(map[string]any)
-		if vars["query"] != "topic:zig-package sort:stars" {
+		if vars["query"] != "topic:zig-package sort:updated" {
 			t.Errorf("unexpected query: %v", vars["query"])
 		}
 		if _, hasCursor := vars["after"]; hasCursor {
 			t.Error("first page should not have 'after' variable")
 		}
 
-		w.Header().Set("X-RateLimit-Remaining", "4999")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
 		w.Write([]byte(mockSearchResponse))
@@ -141,11 +142,6 @@ func TestSearchPage(t *testing.T) {
 	page, err := client.SearchPage(context.Background(), "zig-package", "")
 	if err != nil {
 		t.Fatalf("SearchPage: %v", err)
-	}
-
-	// Rate limit tracking
-	if client.rateLimitRemaining != 4999 {
-		t.Errorf("rateLimitRemaining: got %d", client.rateLimitRemaining)
 	}
 
 	// PageInfo
@@ -261,16 +257,63 @@ func TestSearchPageGraphQLError(t *testing.T) {
 	}
 }
 
-func TestRateLimitBlocked(t *testing.T) {
+func TestRateLimitedInBody(t *testing.T) {
 	t.Parallel()
 
-	client := NewClient("")
-	client.rateLimitRemaining = 0
-	client.rateLimitReset = 9999999999 // far future
+	// GitHub can report rate limiting as a RATE_LIMITED error inside an
+	// otherwise-200 GraphQL body. It must surface as a typed *RateLimitError.
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		json.NewEncoder(w).Encode(map[string]any{
+			"errors": []map[string]any{
+				{"type": "RATE_LIMITED", "message": "API rate limit exceeded"},
+			},
+		})
+	})
 
 	_, err := client.SearchPage(context.Background(), "zig-package", "")
-	if err == nil {
-		t.Fatal("expected rate limit error, got nil")
+	var rle *RateLimitError
+	if !errors.As(err, &rle) {
+		t.Fatalf("expected *RateLimitError, got %T: %v", err, err)
+	}
+	if rle.Resource != "graphql" {
+		t.Errorf("resource: got %q, want %q", rle.Resource, "graphql")
+	}
+}
+
+func TestRateLimitBodyFeedsBudget(t *testing.T) {
+	t.Parallel()
+
+	// The rateLimit block in a successful response must drive the adaptive
+	// limiter: a small remaining budget over a long window yields a slow rate.
+	resetAt := time.Now().Add(time.Hour).UTC().Format(time.RFC3339)
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		json.NewEncoder(w).Encode(map[string]any{
+			"data": map[string]any{
+				"rateLimit": map[string]any{
+					"limit": 5000, "cost": 1, "remaining": 36, "resetAt": resetAt,
+				},
+				"search": map[string]any{
+					"repositoryCount": 0,
+					"pageInfo":        map[string]any{"endCursor": "", "hasNextPage": false},
+					"nodes":           []any{},
+				},
+			},
+		})
+	})
+
+	if _, err := client.SearchPage(context.Background(), "zig-package", ""); err != nil {
+		t.Fatalf("SearchPage: %v", err)
+	}
+
+	// 36 remaining * 0.9 / 3600s ≈ 0.009 rps — far below the default baseline.
+	got := float64(client.budget.limiter.Limit())
+	want := 36.0 * safetyMargin / 3600.0
+	if got < want*0.5 || got > want*1.5 {
+		t.Errorf("limiter rate: got %v, want ~%v", got, want)
 	}
 }
 

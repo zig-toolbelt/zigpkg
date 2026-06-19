@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
-	"time"
 )
 
 const repoFields = `
@@ -33,10 +31,12 @@ const repoFields = `
 `
 
 const repoQuery = `query($owner: String!, $name: String!) {
+  rateLimit { limit cost remaining resetAt }
   repository(owner: $owner, name: $name) {` + repoFields + `}
 }`
 
 const searchQuery = `query($query: String!, $after: String) {
+  rateLimit { limit cost remaining resetAt }
   search(query: $query, type: REPOSITORY, first: 25, after: $after) {
     repositoryCount
     pageInfo { endCursor hasNextPage }
@@ -44,89 +44,120 @@ const searchQuery = `query($query: String!, $after: String) {
   }
 }`
 
-// Client is a GitHub GraphQL API client.
-// It is not safe for concurrent use.
+// Client is a GitHub GraphQL API client. It transparently retries transient
+// failures (network errors, 5xx, rate limits) at the transport layer and paces
+// outbound requests against the server-reported GraphQL point budget. It is not
+// safe for concurrent use.
 type Client struct {
-	baseURL            string
-	http               *http.Client
-	token              string
-	rateLimitRemaining int
-	rateLimitReset     int64
+	baseURL string
+	http    *http.Client
+	budget  *budget
 }
 
 func NewClient(token string) *Client {
 	return &Client{
-		baseURL:            "https://api.github.com/graphql",
-		http:               &http.Client{Timeout: 30 * time.Second},
-		token:              token,
-		rateLimitRemaining: 30,
+		baseURL: "https://api.github.com/graphql",
+		// No client-level Timeout: a single Do may legitimately span several
+		// retries with multi-second Retry-After waits. Cancellation is driven by
+		// the request context instead.
+		http: &http.Client{
+			Transport: newRetryTransport(token, http.DefaultTransport, realClock{}),
+		},
+		budget: newBudget(),
 	}
 }
 
-func (c *Client) graphql(ctx context.Context, query string, variables map[string]any) (graphqlData, error) {
-	if c.rateLimitRemaining == 0 && time.Now().Unix() < c.rateLimitReset {
-		return graphqlData{}, fmt.Errorf("rate limited until %s", time.Unix(c.rateLimitReset, 0))
+// envelope is the top-level GraphQL response shape: a raw data payload plus any
+// errors. data is kept raw so it can be inspected for the rate-limit block and
+// then unmarshalled into the caller's target.
+type envelope struct {
+	Data   json.RawMessage `json:"data"`
+	Errors []graphqlError  `json:"errors"`
+}
+
+// do executes one GraphQL request and decodes its data into out. It paces the
+// request through the adaptive limiter, lets the transport handle HTTP-level
+// retries, and translates GitHub's RATE_LIMITED-in-body signal into a typed
+// *RateLimitError.
+func (c *Client) do(ctx context.Context, query string, variables map[string]any, out any) error {
+	if err := c.budget.Wait(ctx); err != nil {
+		return err
 	}
 
-	body, err := json.Marshal(map[string]any{
+	reqBody, err := json.Marshal(map[string]any{
 		"query":     query,
 		"variables": variables,
 	})
 	if err != nil {
-		return graphqlData{}, err
+		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", c.baseURL, bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL, bytes.NewReader(reqBody))
 	if err != nil {
-		return graphqlData{}, err
+		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	if c.token != "" {
-		req.Header.Set("Authorization", "Bearer "+c.token)
-	}
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return graphqlData{}, err
+		// May be a *RateLimitError raised by the transport after exhausting
+		// retries, a context error, or an unrecoverable network failure.
+		return err
 	}
 	defer resp.Body.Close()
 
-	if v := resp.Header.Get("X-RateLimit-Remaining"); v != "" {
-		c.rateLimitRemaining, _ = strconv.Atoi(v)
-	}
-	if v := resp.Header.Get("X-RateLimit-Reset"); v != "" {
-		c.rateLimitReset, _ = strconv.ParseInt(v, 10, 64)
-	}
-
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		errBody, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
-		return graphqlData{}, fmt.Errorf("github graphql: status %d: %s", resp.StatusCode, errBody)
+		return fmt.Errorf("github graphql: status %d: %s", resp.StatusCode, errBody)
 	}
 
-	var result graphqlResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return graphqlData{}, err
-	}
-	if len(result.Errors) > 0 {
-		return graphqlData{}, fmt.Errorf("github graphql: %s", result.Errors[0].Message)
+	var env envelope
+	if err := json.NewDecoder(resp.Body).Decode(&env); err != nil {
+		return fmt.Errorf("github graphql: decode response: %w", err)
 	}
 
-	return result.Data, nil
+	for _, e := range env.Errors {
+		if e.Type == "RATE_LIMITED" {
+			return &RateLimitError{RetryAfter: c.budget.untilReset(), Resource: "graphql"}
+		}
+	}
+	if len(env.Errors) > 0 {
+		return fmt.Errorf("github graphql: %s", env.Errors[0].Message)
+	}
+
+	// Feed the server-reported budget into the limiter before returning.
+	var meta struct {
+		RateLimit RateLimit `json:"rateLimit"`
+	}
+	if json.Unmarshal(env.Data, &meta) == nil {
+		c.budget.update(meta.RateLimit)
+	}
+
+	if out != nil {
+		if err := json.Unmarshal(env.Data, out); err != nil {
+			return fmt.Errorf("github graphql: decode data: %w", err)
+		}
+	}
+	return nil
 }
 
 // SearchPage fetches one page of repositories for the given topic.
 // Pass an empty cursor for the first page.
+//
+// Results are ordered by recency (sort:updated, newest push first) so the
+// caller can stop paging as soon as it reaches repositories untouched since the
+// last sync — that is what makes an incremental pass possible.
 func (c *Client) SearchPage(ctx context.Context, topic, cursor string) (*SearchPage, error) {
 	vars := map[string]any{
-		"query": "topic:" + topic + " sort:stars",
+		"query": "topic:" + topic + " sort:updated",
 	}
 	if cursor != "" {
 		vars["after"] = cursor
 	}
 
-	data, err := c.graphql(ctx, searchQuery, vars)
-	if err != nil {
+	var data graphqlData
+	if err := c.do(ctx, searchQuery, vars, &data); err != nil {
 		return nil, err
 	}
 	return &data.Search, nil
@@ -138,8 +169,9 @@ func (c *Client) GetRepo(ctx context.Context, owner, name string) (*Repo, error)
 		"owner": owner,
 		"name":  name,
 	}
-	data, err := c.graphql(ctx, repoQuery, vars)
-	if err != nil {
+
+	var data graphqlData
+	if err := c.do(ctx, repoQuery, vars, &data); err != nil {
 		return nil, err
 	}
 	return &data.Repository, nil

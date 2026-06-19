@@ -10,7 +10,8 @@ import (
 
 type Package struct {
 	ID            int32
-	GithubID      int64
+	Source        string
+	SourceID      int64
 	Name          string
 	FullName      string
 	OwnerID       int32
@@ -22,7 +23,7 @@ type Package struct {
 	License       pgtype.Text
 	Homepage      pgtype.Text
 	RepositoryUrl string
-	Topics        pgtype.Text
+	Topics        []byte
 	PackageType   string
 	CreatedAt     pgtype.Timestamptz
 	UpdatedAt     pgtype.Timestamptz
@@ -42,15 +43,18 @@ type PackageContent struct {
 
 type SyncMetadatum struct {
 	ID         int32
+	Source     string
 	Topic      string
 	LastSyncAt pgtype.Timestamptz
 	TotalCount pgtype.Int4
 	NextSyncAt pgtype.Timestamptz
+	SyncCursor pgtype.Text
 }
 
 type User struct {
 	ID        int32
-	GithubID  int64
+	Source    string
+	SourceID  int64
 	Username  string
 	AvatarUrl pgtype.Text
 	Bio       pgtype.Text

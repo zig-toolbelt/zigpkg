@@ -33,6 +33,7 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 		packages: pkgs.map((pkg) => ({
 			name: pkg.name,
 			fullName: pkg.fullName,
+			source: pkg.source,
 			owner: pkg.owner,
 			description: pkg.description || '',
 			version: pkg.version || 'latest',

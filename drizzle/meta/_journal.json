@@ -8,6 +8,20 @@
       "when": 1773672682704,
       "tag": "0000_chunky_moira_mactaggert",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781896973945,
+      "tag": "0001_new_loki",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782000000000,
+      "tag": "0002_add_source",
+      "breakpoints": true
     }
   ]
 }

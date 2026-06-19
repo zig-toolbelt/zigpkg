@@ -4,8 +4,9 @@ import {
 	getPackageByFullName,
 	getPackageByFullNameCaseInsensitive
 } from '$lib/server/packages/queries';
-import { githubClient } from '$lib/server/github/client';
+import { getContentClient } from '$lib/server/content-client';
 import { getPackageContent } from '$lib/server/packages/content';
+import { ownerUrl } from '$lib/providers';
 
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const fullName = `${params.owner}/${params.repo}`;
@@ -26,7 +27,7 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	let contentDegraded = false;
 
 	try {
-		const content = await getPackageContent(pkg, githubClient);
+		const content = await getPackageContent(pkg, getContentClient(pkg.source));
 		readmeHtml = content.readmeHtml;
 		tagList = content.tagList;
 		fileList = content.fileList;
@@ -51,8 +52,10 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 		package: {
 			name: pkg.name,
 			fullName: pkg.fullName,
+			source: pkg.source,
 			owner: pkg.owner,
 			ownerAvatarUrl: pkg.ownerAvatarUrl,
+			ownerHtmlUrl: pkg.ownerHtmlUrl || ownerUrl(pkg.source, pkg.owner),
 			description: pkg.description || '',
 			version: pkg.version || 'latest',
 			stars: pkg.stars,
