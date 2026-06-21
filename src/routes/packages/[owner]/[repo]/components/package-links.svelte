@@ -24,7 +24,7 @@
       href={repositoryUrl}
       target="_blank"
       rel="noopener noreferrer"
-      class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-yellow-600 transition-colors"
+      class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-zig-600 transition-colors"
     >
       <ExternalLink class="w-4 h-4 shrink-0" />
       <span>Repository</span>
@@ -39,7 +39,7 @@
         href={homepage}
         target="_blank"
         rel="noopener noreferrer"
-        class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-yellow-600 transition-colors"
+        class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-zig-600 transition-colors"
       >
         <Globe class="w-4 h-4 shrink-0" />
         Homepage
@@ -49,7 +49,7 @@
       href={issuesUrl}
       target="_blank"
       rel="noopener noreferrer"
-      class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-yellow-600 transition-colors"
+      class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-zig-600 transition-colors"
     >
       <CircleAlert class="w-4 h-4 shrink-0" />
       Issues

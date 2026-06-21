@@ -5,7 +5,7 @@
 <div class="bg-white border border-gray-200 rounded-sm p-8">
   {#if readme}
     <div
-      class="prose prose-slate max-w-none prose-headings:font-bold prose-a:text-yellow-600 prose-a:no-underline hover:prose-a:underline"
+      class="prose prose-slate max-w-none prose-headings:font-bold prose-a:text-zig-600 prose-a:no-underline hover:prose-a:underline"
     >
       {@html readme}
     </div>

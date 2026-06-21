@@ -27,7 +27,7 @@
           class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors border-t border-gray-100 first:border-t-0"
         >
           {#if item.type === "dir"}
-            <Folder class="w-5 h-5 text-yellow-500" />
+            <Folder class="w-5 h-5 text-zig-500" />
           {:else}
             <FileText class="w-5 h-5 text-slate-400" />
           {/if}

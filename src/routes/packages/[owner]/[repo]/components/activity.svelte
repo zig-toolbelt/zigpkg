@@ -16,9 +16,9 @@
       case daysSinceCommit < 180:
         return {
           label: "Moderate",
-          color: "text-amber-500",
-          bg: "bg-amber-50",
-          border: "border-amber-200",
+          color: "text-zig-500",
+          bg: "bg-zig-50",
+          border: "border-zig-200",
           pulse: false,
         };
       default:

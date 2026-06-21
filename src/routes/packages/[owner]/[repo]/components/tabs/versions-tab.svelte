@@ -9,14 +9,14 @@
       <div
         class="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-gray-50 transition-colors {i ===
         0
-          ? 'bg-yellow-50/50 border border-yellow-100'
+          ? 'bg-zig-50/50 border border-zig-100'
           : ''}"
       >
         <div class="flex items-center gap-3">
           <span class="font-mono font-semibold text-slate-900">{tag.name}</span>
           {#if i === 0}
             <span
-              class="text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700"
+              class="text-xs font-semibold px-2 py-0.5 rounded-full bg-zig-100 text-zig-700"
               >latest</span
             >
           {/if}

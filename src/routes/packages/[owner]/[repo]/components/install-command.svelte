@@ -30,7 +30,7 @@
     <div
       class="bg-slate-900 rounded-xs px-4 py-3 font-mono text-sm text-slate-100 overflow-x-auto"
     >
-      <span class="text-yellow-300">> {installCommand}</span>
+      <span class="text-zig-300">> {installCommand}</span>
     </div>
     <button
       type="button"

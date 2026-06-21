@@ -11,7 +11,7 @@
 
   let activeCn = $derived(
     active
-      ? "border-yellow-400 text-yellow-700"
+      ? "border-zig-400 text-zig-700"
       : "border-transparent text-slate-500 hover:text-slate-900 hover:border-gray-300",
   );
 </script>

@@ -46,7 +46,7 @@
 </svelte:head>
 
 <div
-  class="text-slate-900 font-sans selection:bg-yellow-200 selection:text-black"
+  class="text-slate-900 font-sans selection:bg-zig-200 selection:text-black"
 >
   <!-- Owner Header -->
   <div class="flex items-center gap-4 mb-8">
@@ -69,24 +69,24 @@
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {#each data.packages as pkg (pkg.fullName)}
       <div
-        class="group relative flex flex-col bg-white border border-gray-200 rounded-sm p-6 transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/10 hover:border-yellow-400/50"
+        class="group relative flex flex-col bg-white border border-gray-200 rounded-sm p-6 transition-all duration-300 hover:shadow-xl hover:shadow-zig-500/10 hover:border-zig-400/50"
       >
         <div class="flex items-start justify-between mb-4">
           <div class="flex items-center gap-3">
             <div
-              class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-xl shadow-sm group-hover:scale-110 group-hover:bg-yellow-50 group-hover:border-yellow-100 transition-all duration-300"
+              class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-xl shadow-sm group-hover:scale-110 group-hover:bg-zig-50 group-hover:border-zig-100 transition-all duration-300"
             >
               📦
             </div>
             <h2
-              class="text-lg font-bold text-slate-900 group-hover:text-yellow-600 transition-colors"
+              class="text-lg font-bold text-slate-900 group-hover:text-zig-600 transition-colors"
             >
               <a href={`/packages/${pkg.fullName}`}>{pkg.name}</a>
             </h2>
           </div>
           <div class="flex items-center gap-1.5">
             <span
-              class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-gray-100 text-slate-500 border border-gray-200 group-hover:border-yellow-200 group-hover:bg-yellow-50 group-hover:text-yellow-700 transition-colors"
+              class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-gray-100 text-slate-500 border border-gray-200 group-hover:border-zig-200 group-hover:bg-zig-50 group-hover:text-zig-700 transition-colors"
             >
               {pkg.version}
             </span>

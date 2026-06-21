@@ -6,7 +6,7 @@
 <!-- Hero -->
 <div class="-mx-[calc((100vw-100%)/2)] bg-slate-900 text-white px-4 py-16 mb-12">
   <div class="container mx-auto">
-    <p class="text-yellow-400 text-sm font-semibold uppercase tracking-widest mb-3">Legal</p>
+    <p class="text-zig-400 text-sm font-semibold uppercase tracking-widest mb-3">Legal</p>
     <h1 class="text-4xl font-bold mb-4">Cookie Policy</h1>
     <p class="text-slate-400 text-sm">Last updated: March 17, 2026</p>
   </div>

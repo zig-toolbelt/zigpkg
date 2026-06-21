@@ -15,7 +15,7 @@
     <div class="flex items-center justify-between">
       <span class="text-sm text-slate-500">Stars</span>
       <div class="flex items-center gap-1.5">
-        <Star class="w-4 h-4 text-yellow-400" fill="currentColor" />
+        <Star class="w-4 h-4 text-zig-400" fill="currentColor" />
         <span class="text-sm font-bold text-slate-900"
           >{stars.toLocaleString()}</span
         >

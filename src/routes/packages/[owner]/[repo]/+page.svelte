@@ -64,7 +64,7 @@
   <div class="mb-2">
     <a
       href="/packages"
-      class="text-sm text-slate-400 hover:text-yellow-600 transition-colors flex items-center gap-1"
+      class="text-sm text-slate-400 hover:text-zig-600 transition-colors flex items-center gap-1"
     >
       <ChevronLeft class="w-4 h-4" />
       Back to packages
@@ -75,7 +75,7 @@
     <div class="flex flex-wrap items-center gap-2">
         <h1 class="text-3xl font-bold text-slate-900">{pkg.name}</h1>
         <span
-          class="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 border border-yellow-200"
+          class="text-xs font-semibold px-2.5 py-1 rounded-full bg-zig-100 text-zig-700 border border-zig-200"
         >
           {pkg.version}
         </span>
@@ -98,7 +98,7 @@
         href={pkg.repositoryUrl}
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-slate-700 hover:border-yellow-400 hover:text-yellow-700 transition-colors"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-slate-700 hover:border-zig-400 hover:text-zig-700 transition-colors"
       >
         <ExternalLink class="w-4 h-4" />
         Repository
@@ -109,7 +109,7 @@
 
 {#if data.contentDegraded}
   <div
-    class="mt-4 mb-4 px-4 py-3 rounded-lg bg-yellow-50 border border-yellow-200 text-sm text-yellow-800"
+    class="mt-4 mb-4 px-4 py-3 rounded-lg bg-zig-50 border border-zig-200 text-sm text-zig-800"
   >
     README, files, and versions are temporarily unavailable. Please try again in a few minutes.
   </div>

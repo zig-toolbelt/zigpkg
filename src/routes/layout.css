@@ -45,18 +45,30 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Zig brand orange — accent scale (anchored at zig-400 = #F7A41D) */
+  --color-zig-50: #fff8ed;
+  --color-zig-100: #ffefd4;
+  --color-zig-200: #fed9a8;
+  --color-zig-300: #fdbb70;
+  --color-zig-400: #f7a41d;
+  --color-zig-500: #ed8a0a;
+  --color-zig-600: #d1700a;
+  --color-zig-700: #a4530c;
+  --color-zig-800: #854210;
+  --color-zig-900: #6f3711;
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.25rem;
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(0.205 0 0);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.205 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --popover-foreground: oklch(0.205 0 0);
+  --primary: #f7a41d;
+  --primary-foreground: #1a1a1a;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -66,7 +78,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: #f7a41d;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -123,6 +135,16 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Blueprint "graph paper" page background — shows in the gutters beside
+   the white content column (the column itself sits on top with border-x). */
+.zp-grid {
+  background-color: #f5f6f8;
+  background-image:
+    linear-gradient(to right, rgb(100 116 139 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(100 116 139 / 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 .prose code:not(pre code) {

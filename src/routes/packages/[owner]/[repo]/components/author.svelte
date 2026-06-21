@@ -22,13 +22,13 @@
       <img src={ownerAvatarUrl} alt={owner} class="w-8 h-8 rounded-full" />
     {:else}
       <div
-        class="w-8 h-8 rounded-full bg-linear-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-white text-xs font-bold"
+        class="w-8 h-8 rounded-full bg-linear-to-br from-zig-400 to-orange-400 flex items-center justify-center text-white text-xs font-bold"
       >
         {owner[0].toUpperCase()}
       </div>
     {/if}
     <span
-      class="text-sm font-medium text-slate-700 group-hover:text-yellow-600 transition-colors"
+      class="text-sm font-medium text-slate-700 group-hover:text-zig-600 transition-colors"
       >{owner}</span
     >
   </a>

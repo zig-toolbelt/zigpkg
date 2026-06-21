@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import PackageRow from '$lib/components/package-row.svelte';
+	import PackageCard from '$lib/components/package-card.svelte';
 
 	let { data } = $props();
 
@@ -28,122 +28,153 @@
 		return pages;
 	});
 
-	function buildUrl(params: { page?: number; sort?: string; letter?: string | null }) {
+	function buildUrl(params: {
+		page?: number;
+		sort?: string;
+		letter?: string | null;
+		type?: string | null;
+	}) {
 		const p = new URLSearchParams();
 		const page = params.page ?? data.page;
 		const sort = params.sort ?? data.sort;
 		const letter = 'letter' in params ? params.letter : data.letter;
+		const type = 'type' in params ? params.type : data.type;
 
 		if (page > 1) p.set('page', String(page));
 		if (sort !== 'stars') p.set('sort', sort);
 		if (letter) p.set('letter', letter);
+		if (type) p.set('type', type);
 
 		const qs = p.toString();
 		return `/packages${qs ? '?' + qs : ''}`;
 	}
 
-	function navigate(params: { page?: number; sort?: string; letter?: string | null }) {
+	function navigate(params: {
+		page?: number;
+		sort?: string;
+		letter?: string | null;
+		type?: string | null;
+	}) {
 		goto(buildUrl(params));
 	}
+
+	const typeTabs: { label: string; value: string | null }[] = [
+		{ label: 'All', value: null },
+		{ label: 'Libraries', value: 'library' },
+		{ label: 'Applications', value: 'application' }
+	];
 
 	const sortOptions: { label: string; value: string }[] = [
 		{ label: 'Stars', value: 'stars' },
 		{ label: 'Name', value: 'name' },
-		{ label: 'Recently Created', value: 'new' },
-		{ label: 'Recently Updated', value: 'updated' }
+		{ label: 'Newest', value: 'new' },
+		{ label: 'Updated', value: 'updated' }
 	];
 </script>
 
-<div class="">
-	<!-- Header -->
-	<div class="mb-6">
-		<h1 class="text-2xl font-bold text-foreground">Packages</h1>
-		<p class="text-muted-foreground mt-1">
-			{data.totalCount.toLocaleString()} Result{data.totalCount !== 1 ? 's' : ''} Found
-		</p>
-	</div>
+<!-- Header -->
+<div class="mb-6">
+	<h1 class="text-2xl font-semibold tracking-tight text-slate-900">Packages</h1>
+	<p class="mt-1 font-mono text-xs text-slate-400">
+		{data.totalCount.toLocaleString()} package{data.totalCount !== 1 ? 's' : ''}
+	</p>
+</div>
 
-	<!-- Letter Filter -->
-	<div class="mb-4 flex flex-wrap gap-1">
-		<button
-			onclick={() => navigate({ letter: null, page: 1 })}
-			class="px-2.5 py-1 text-sm rounded border transition-colors {!data.letter
-				? 'bg-primary text-primary-foreground border-primary'
-				: 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'}"
-		>
-			All
-		</button>
-		{#each LETTERS as letter (letter)}
+<!-- Type + sort pills -->
+<div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+	<div class="flex items-center gap-1">
+		{#each typeTabs as tab (tab.label)}
 			<button
-				onclick={() => navigate({ letter, page: 1 })}
-				class="px-2.5 py-1 text-sm rounded border transition-colors {data.letter === letter
-					? 'bg-primary text-primary-foreground border-primary'
-					: 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'}"
+				onclick={() => navigate({ type: tab.value, page: 1 })}
+				class="h-6 rounded-sm px-1.5 font-mono text-xs transition-colors {data.type === tab.value
+					? 'border border-zig-400/50 bg-zig-500/10 text-zig-700'
+					: 'border border-transparent text-slate-500 hover:bg-slate-100'}"
 			>
-				{letter}
+				{tab.label}
 			</button>
 		{/each}
 	</div>
 
-	<!-- Sort Options -->
-	<div class="mb-4 flex items-center gap-1 border-b border-border pb-3">
-		<span class="text-sm text-muted-foreground mr-2">Sort by:</span>
+	<div class="flex items-center gap-1">
+		<span class="mr-1 font-mono text-[11px] text-slate-400">sort</span>
 		{#each sortOptions as option (option.value)}
 			<button
 				onclick={() => navigate({ sort: option.value, page: 1 })}
-				class="px-3 py-1.5 text-sm rounded transition-colors {data.sort === option.value
-					? 'bg-accent text-foreground font-medium'
-					: 'text-muted-foreground hover:text-foreground hover:bg-accent/50'}"
+				class="h-6 rounded-sm px-1.5 font-mono text-xs transition-colors {data.sort === option.value
+					? 'border border-zig-400/50 bg-zig-500/10 text-zig-700'
+					: 'border border-transparent text-slate-500 hover:bg-slate-100'}"
 			>
 				{option.label}
 			</button>
 		{/each}
 	</div>
-
-	<!-- Package List -->
-	{#if data.packages.length === 0}
-		<div class="py-16 text-center text-muted-foreground">No packages found.</div>
-	{:else}
-		<div class="divide-y divide-border border border-border rounded-lg overflow-hidden">
-			{#each data.packages as pkg (pkg.id)}
-				<PackageRow {...pkg} />
-			{/each}
-		</div>
-	{/if}
-
-	<!-- Pagination -->
-	{#if totalPages > 1}
-		<div class="mt-6 flex items-center justify-center gap-1">
-			<button
-				onclick={() => navigate({ page: data.page - 1 })}
-				disabled={data.page <= 1}
-				class="px-3 py-1.5 text-sm rounded border border-border transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:bg-accent"
-			>
-				&larr;
-			</button>
-
-			{#each visiblePages as pg (pg)}
-				{#if pg === '...'}
-					<span class="px-2 py-1.5 text-sm text-muted-foreground">…</span>
-				{:else}
-					<button
-						onclick={() => navigate({ page: pg as number })}
-						class="px-3 py-1.5 text-sm rounded border transition-colors {data.page === pg
-							? 'bg-primary text-primary-foreground border-primary font-medium'
-							: 'border-border hover:bg-accent'}"
-					>
-						{pg}
-					</button>
-				{/if}
-			{/each}
-
-			<button
-				onclick={() => navigate({ page: data.page + 1 })}
-				disabled={data.page >= totalPages}
-				class="px-3 py-1.5 text-sm rounded border border-border transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:enabled:bg-accent"
-			>
-				&rarr;
-			</button>
-		</div>
-	{/if}
 </div>
+
+<!-- Letter filter -->
+<div class="mb-4 flex flex-wrap gap-1 border-b border-slate-200 pb-4">
+	<button
+		onclick={() => navigate({ letter: null, page: 1 })}
+		class="h-5 rounded-sm px-1 font-mono text-[11px] transition-colors {!data.letter
+			? 'font-semibold text-zig-700'
+			: 'text-slate-400 hover:text-slate-900'}"
+	>
+		All
+	</button>
+	{#each LETTERS as letter (letter)}
+		<button
+			onclick={() => navigate({ letter, page: 1 })}
+			class="h-5 rounded-sm px-1 font-mono text-[11px] transition-colors {data.letter === letter
+				? 'font-semibold text-zig-700'
+				: 'text-slate-400 hover:text-slate-900'}"
+		>
+			{letter}
+		</button>
+	{/each}
+</div>
+
+<!-- Package grid -->
+{#if data.packages.length === 0}
+	<div class="py-20 text-center font-mono text-xs text-slate-400">No packages found.</div>
+{:else}
+	<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+		{#each data.packages as pkg (pkg.id)}
+			<PackageCard {...pkg} />
+		{/each}
+	</div>
+{/if}
+
+<!-- Pagination -->
+{#if totalPages > 1}
+	<div class="mt-8 flex items-center justify-center gap-1 font-mono text-xs">
+		<button
+			onclick={() => navigate({ page: data.page - 1 })}
+			disabled={data.page <= 1}
+			class="h-7 rounded-sm px-2.5 text-slate-500 transition-colors hover:enabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30"
+		>
+			←
+		</button>
+
+		{#each visiblePages as pg (pg)}
+			{#if pg === '...'}
+				<span class="px-1.5 text-slate-300">…</span>
+			{:else}
+				<button
+					onclick={() => navigate({ page: pg as number })}
+					class="h-7 rounded-sm px-2.5 transition-colors {data.page === pg
+						? 'border border-zig-400/50 bg-zig-500/10 font-semibold text-zig-700'
+						: 'text-slate-500 hover:bg-slate-100'}"
+				>
+					{pg}
+				</button>
+			{/if}
+		{/each}
+
+		<button
+			onclick={() => navigate({ page: data.page + 1 })}
+			disabled={data.page >= totalPages}
+			class="h-7 rounded-sm px-2.5 text-slate-500 transition-colors hover:enabled:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30"
+		>
+			→
+		</button>
+	</div>
+{/if}

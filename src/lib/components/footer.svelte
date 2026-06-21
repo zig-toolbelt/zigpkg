@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { Heart } from 'lucide-svelte';
-
   const links = {
     community: [
       { label: "Discord", href: "https://discord.gg/zig" },
@@ -14,165 +12,48 @@
       { label: "Documentation", href: "/docs" },
       { label: "Blog", href: "/blog" },
     ],
-    ecosystem: [
-      { label: "Packages", href: "/packages" },
-    ],
+    ecosystem: [{ label: "Packages", href: "/packages" }],
     legal: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
       { label: "Cookie Policy", href: "/cookie" },
     ],
   };
+
+  const columns = [
+    { title: "Community", items: links.community },
+    { title: "Resources", items: links.resources },
+    { title: "Ecosystem", items: links.ecosystem },
+    { title: "Legal", items: links.legal },
+  ];
 </script>
 
-<!-- Detailed Footer -->
-<footer class="border-t border-gray-200 bg-white pt-16 pb-12">
-  <div class="container mx-auto">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-      <!-- Column 1 -->
-      <div>
-        <h4 class="font-bold text-slate-900 mb-4">Community</h4>
-        <ul class="space-y-3 text-sm text-slate-500">
-          {#each links.community as c}
-            <li>
-              <a href={c.href} class="hover:text-yellow-600 transition-colors"
-                >{c.label}</a
-              >
-            </li>
-          {/each}
-        </ul>
-      </div>
-      <!-- Column 2 -->
-      <div>
-        <h4 class="font-bold text-slate-900 mb-4">Resources</h4>
-        <ul class="space-y-3 text-sm text-slate-500">
-          {#each links.resources as r}
-            <li>
-              <a href={r.href} class="hover:text-yellow-600 transition-colors">
-                {r.label}
-              </a>
-            </li>
-          {/each}
-        </ul>
-      </div>
-      <!-- Column 3 -->
-      <div>
-        <h4 class="font-bold text-slate-900 mb-4">Ecosystem</h4>
-        <ul class="space-y-3 text-sm text-slate-500">
-          {#each links.ecosystem as l}
-            <li>
-              <a href={l.href} class="hover:text-yellow-600 transition-colors">
-                {l.label}
-              </a>
-            </li>
-          {/each}
-        </ul>
-      </div>
-      <!-- Column 4 -->
-      <div>
-        <h4 class="font-bold text-slate-900 mb-4">Legal</h4>
-        <ul class="space-y-3 text-sm text-slate-500">
-          {#each links.legal as l }
-            <li>
-              <a href={l.href} class="hover:text-yellow-600 transition-colors">
-                {l.label}
-              </a>
-            </li>
-          {/each}
-        </ul>
-      </div>
+<footer class="border-t border-slate-200 bg-white">
+  <div class="mx-auto max-w-7xl px-6 sm:px-10 py-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+      {#each columns as col (col.title)}
+        <div>
+          <h4 class="font-mono text-[11px] uppercase tracking-wider text-slate-400 mb-3">
+            {col.title}
+          </h4>
+          <ul class="space-y-2 text-sm text-slate-600">
+            {#each col.items as item (item.href)}
+              <li>
+                <a href={item.href} class="hover:text-zig-600 transition-colors">
+                  {item.label}
+                </a>
+              </li>
+            {/each}
+          </ul>
+        </div>
+      {/each}
     </div>
 
     <div
-      class="border-t border-gray-100 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-slate-400"
+      class="border-t border-slate-200 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 font-mono text-xs text-slate-400"
     >
-      <p>© 2026 ZigPkg. All rights reserved.</p>
-      <div class="flex items-center gap-2 mt-4 md:mt-0">
-        <span>Made with</span>
-        <Heart class="w-4 h-4 text-red-500" fill="currentColor" />
-        <span>for zig community</span>
-      </div>
+      <p>© 2026 zigpkg</p>
+      <p>Made for the Zig community</p>
     </div>
   </div>
 </footer>
-
-<!-- 
-<footer class="border-t bg-muted/30">
-	<div class="container mx-auto px-4 py-12">
-		<div class="grid grid-cols-2 md:grid-cols-5 gap-8">
-			<div class="col-span-2 md:col-span-1">
-				<a href="/" class="flex items-center space-x-2">
-					<svg class="h-6 w-6" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M200 50L350 150V300L200 400L50 300V150L200 50Z" fill="#F7A41D"/>
-						<path d="M200 100L300 166.67V300L200 366.67L100 300V166.67L200 100Z" fill="#1A1A1A"/>
-					</svg>
-					<span class="font-bold">zigpkg</span>
-				</a>
-				<p class="text-sm text-muted-foreground mt-4">
-					The package manager for the Zig ecosystem.
-				</p>
-			</div>
-
-			<div>
-				<h4 class="font-semibold mb-3">About</h4>
-				<ul class="space-y-2">
-					{#each links.about as link}
-						<li>
-							<a href={link.href} class="text-sm text-muted-foreground hover:text-foreground">
-								{link.label}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</div>
-
-			<div>
-				<h4 class="font-semibold mb-3">Resources</h4>
-				<ul class="space-y-2">
-					{#each links.resources as link}
-						<li>
-							<a href={link.href} class="text-sm text-muted-foreground hover:text-foreground">
-								{link.label}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</div>
-
-			<div>
-				<h4 class="font-semibold mb-3">Community</h4>
-				<ul class="space-y-2">
-					{#each links.community as link}
-						<li>
-							<a href={link.href} class="text-sm text-muted-foreground hover:text-foreground">
-								{link.label}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</div>
-
-			<div>
-				<h4 class="font-semibold mb-3">Legal</h4>
-				<ul class="space-y-2">
-					{#each links.legal as link}
-						<li>
-							<a href={link.href} class="text-sm text-muted-foreground hover:text-foreground">
-								{link.label}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		</div>
-
-		<div class="mt-12 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
-			<p class="text-sm text-muted-foreground">
-				&copy; {new Date().getFullYear()} zigpkg. All rights reserved.
-			</p>
-			<p class="text-sm text-muted-foreground">
-				Made with love for the <a href="https://ziglang.org" class="hover:text-foreground">Zig</a> community.
-			</p>
-		</div>
-	</div>
-</footer> -->

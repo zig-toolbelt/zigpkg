@@ -14,7 +14,7 @@
 </svelte:head>
 
 <div class="flex flex-col items-center justify-center text-center py-20 px-4">
-  <p class="text-sm font-semibold tracking-widest uppercase text-yellow-600 mb-3">
+  <p class="text-sm font-semibold tracking-widest uppercase text-zig-600 mb-3">
     Error {status}
   </p>
   <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4">
