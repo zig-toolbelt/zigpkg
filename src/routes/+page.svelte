@@ -38,84 +38,107 @@
   {@html '<script type="application/ld+json">' + homeJsonLd + '<\/script>'}
 </svelte:head>
 
-<div class="mx-auto max-w-7xl px-6 sm:px-10 py-10">
-  <section class="rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
-    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-center">
-      <div>
-        <div class="mb-3 font-mono text-[11px] uppercase tracking-wide text-zig-700">
-          Zig package discovery
-        </div>
-        <h1 class="max-w-2xl text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl">
-          Find your next Zig package
-        </h1>
-        <p class="mt-4 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base sm:leading-7">
-          Discover libraries, applications and tools across the Zig ecosystem.
-        </p>
+<section
+  class="relative overflow-hidden border-b border-zig-100 bg-zig-50"
+>
+  <div
+    class="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(circle_at_1px_1px,rgb(245_158_11_/_0.16)_1px,transparent_0)] [background-size:26px_26px]"
+  ></div>
+  <div class="pointer-events-none absolute left-1/2 top-1/2 h-[28rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/70 blur-3xl"></div>
 
-        <form
-          onsubmit={handleSearch}
-          class="mt-7 flex max-w-2xl rounded-lg border border-slate-200 bg-white"
-        >
-          <div class="relative flex-1">
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <Search class="h-4 w-4 text-slate-400" />
-            </div>
-            <input
-              bind:value={searchQuery}
-              type="search"
-              placeholder="Search {data.stats.totalPackages.toLocaleString()} packages..."
-              class="h-11 w-full rounded-l-lg border-0 bg-white pl-9 pr-3 text-sm text-slate-900 placeholder:italic placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-zig-400"
-            />
-          </div>
-          <button
-            type="submit"
-            class="shrink-0 rounded-r-lg border-l border-slate-200 bg-slate-950 px-5 font-mono text-xs font-medium text-white transition-colors hover:bg-slate-800"
-          >
-            Search
-          </button>
-        </form>
+  <div class="relative mx-auto max-w-7xl px-6 py-16 sm:px-10 sm:py-20">
+    <div class="mx-auto max-w-3xl text-center">
+      <div class="mb-3 font-mono text-[11px] font-semibold uppercase tracking-wide text-zig-700">
+        Zig package discovery
       </div>
+      <h1 class="text-4xl font-black leading-[1.05] tracking-tight text-slate-950 sm:text-6xl">
+        Find your next Zig package
+      </h1>
+      <p class="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+        Search curated Zig libraries from GitHub and Codeberg, compare activity, and find the right dependency faster.
+      </p>
 
-      <dl class="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200">
-        <div class="bg-white p-4">
-          <dt class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-400">
-            <Package class="h-3.5 w-3.5 text-zig-500" />
-            Packages
-          </dt>
-          <dd class="mt-2 font-mono text-xl font-bold text-slate-900">
-            {data.stats.totalPackages.toLocaleString()}
-          </dd>
+      <form
+        onsubmit={handleSearch}
+        class="mx-auto mt-8 flex max-w-2xl rounded-lg border border-slate-200 bg-white shadow-[0_18px_45px_rgb(15_23_42_/_0.10)]"
+      >
+        <div class="relative flex-1">
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <Search class="h-4 w-4 text-slate-400" />
+          </div>
+          <input
+            bind:value={searchQuery}
+            type="search"
+            placeholder="Search {data.stats.totalPackages.toLocaleString()} packages..."
+            class="h-14 w-full rounded-l-lg border-0 bg-white pl-10 pr-3 text-sm text-slate-900 placeholder:italic placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-zig-400"
+          />
         </div>
-        <div class="bg-white p-4">
-          <dt class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-400">
-            <Star class="h-3.5 w-3.5 text-zig-500" fill="currentColor" />
-            Stars
-          </dt>
-          <dd class="mt-2 font-mono text-xl font-bold text-slate-900">
-            {formatNumber(data.stats.totalStars)}
-          </dd>
-        </div>
-        <div class="bg-white p-4">
-          <dt class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-400">
-            <Library class="h-3.5 w-3.5 text-indigo-600" />
-            Libraries
-          </dt>
-          <dd class="mt-2 font-mono text-xl font-bold text-slate-900">
-            {data.stats.totalLibraries.toLocaleString()}
-          </dd>
-        </div>
-        <div class="bg-white p-4">
-          <dt class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-400">
-            <AppWindow class="h-3.5 w-3.5 text-indigo-600" />
-            Applications
-          </dt>
-          <dd class="mt-2 font-mono text-xl font-bold text-slate-900">
-            {data.stats.totalApplications.toLocaleString()}
-          </dd>
-        </div>
-      </dl>
+        <button
+          type="submit"
+          class="shrink-0 rounded-r-lg border-l border-slate-200 bg-slate-950 px-6 font-mono text-xs font-medium text-white transition-colors hover:bg-slate-800"
+        >
+          Search
+        </button>
+      </form>
     </div>
-  </section>
+  </div>
+</section>
+
+<div class="mx-auto max-w-7xl px-6 sm:px-10 py-10">
+  <dl class="mb-8 grid grid-cols-2 gap-6 border-b border-slate-100 pb-8 lg:grid-cols-4">
+    <div class="flex items-center gap-3.5">
+      <div class="flex h-9 w-9 items-center justify-center rounded-lg border border-zig-200 bg-zig-100 text-zig-700">
+        <Package class="h-4 w-4" />
+      </div>
+      <div>
+        <dt class="font-mono text-[11px] uppercase tracking-wide text-slate-400">
+          Packages
+        </dt>
+        <dd class="mt-1 font-mono text-xl font-bold text-slate-900">
+          {data.stats.totalPackages.toLocaleString()}
+        </dd>
+      </div>
+    </div>
+    <div class="flex items-center gap-3.5">
+      <div class="flex h-9 w-9 items-center justify-center rounded-lg border border-zig-200 bg-zig-100 text-zig-700">
+        <Star class="h-4 w-4" fill="currentColor" />
+      </div>
+      <div>
+        <dt class="font-mono text-[11px] uppercase tracking-wide text-slate-400">
+          Stars
+        </dt>
+        <dd class="mt-1 font-mono text-xl font-bold text-slate-900">
+          {formatNumber(data.stats.totalStars)}
+        </dd>
+      </div>
+    </div>
+    <div class="flex items-center gap-3.5">
+      <div class="flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700">
+        <Library class="h-4 w-4" />
+      </div>
+      <div>
+        <dt class="font-mono text-[11px] uppercase tracking-wide text-slate-400">
+          Libraries
+        </dt>
+        <dd class="mt-1 font-mono text-xl font-bold text-slate-900">
+          {data.stats.totalLibraries.toLocaleString()}
+        </dd>
+      </div>
+    </div>
+    <div class="flex items-center gap-3.5">
+      <div class="flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700">
+        <AppWindow class="h-4 w-4" />
+      </div>
+      <div>
+        <dt class="font-mono text-[11px] uppercase tracking-wide text-slate-400">
+          Applications
+        </dt>
+        <dd class="mt-1 font-mono text-xl font-bold text-slate-900">
+          {data.stats.totalApplications.toLocaleString()}
+        </dd>
+      </div>
+    </div>
+  </dl>
 
   {#if data.popular.length === 0}
     <div class="py-20 text-center">
