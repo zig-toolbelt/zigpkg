@@ -12,7 +12,7 @@
   const ownerHref = $derived(ownerHtmlUrl ?? resolve(`/packages/${owner}`));
 </script>
 
-<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+<div class="rounded-lg border border-slate-200 bg-white p-3.5">
   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
     Owner
   </h3>

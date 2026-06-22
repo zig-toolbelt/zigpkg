@@ -2,7 +2,7 @@
   let { tags }: { tags: { name: string; sha: string }[] } = $props();
 </script>
 
-<div class="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+<div class="space-y-3 rounded-lg border border-slate-200 bg-white p-5">
   <h2 class="text-lg font-bold text-slate-900 mb-4">Version History</h2>
   {#if tags.length > 0}
     {#each tags as tag, i (tag.name)}

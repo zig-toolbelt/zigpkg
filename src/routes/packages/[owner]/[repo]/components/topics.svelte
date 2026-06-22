@@ -6,7 +6,7 @@
   let { items }: Props = $props();
 </script>
 
-<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+<div class="rounded-lg border border-slate-200 bg-white p-3.5">
   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
     Keywords
   </h3>
@@ -14,7 +14,7 @@
     {#each items as topic (topic)}
       <a
         href="/search?q={encodeURIComponent(topic)}"
-        class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-zig-200 hover:bg-zig-50 hover:text-zig-700"
+        class="rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-medium text-slate-500 transition-colors hover:bg-zig-100 hover:text-zig-700"
         >{topic}</a
       >
     {/each}

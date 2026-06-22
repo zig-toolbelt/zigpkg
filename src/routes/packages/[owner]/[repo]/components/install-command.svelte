@@ -22,22 +22,19 @@
   }
 </script>
 
-<div
-  class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
->
-  <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
-    <div>
-      <h2 class="text-sm font-bold text-slate-950">Install package</h2>
-      <p class="mt-0.5 text-xs text-slate-500">Add this package to your Zig project.</p>
-    </div>
+<div class="rounded-lg border border-slate-200 bg-white p-3.5">
+  <div class="mb-2 flex items-center justify-between gap-3">
+    <h2 class="font-mono text-[11px] font-bold uppercase tracking-wide text-slate-400">
+      Install
+    </h2>
     {#if copied}
-      <span class="text-xs font-semibold text-emerald-600">Copied</span>
+      <span class="font-mono text-[11px] font-semibold text-emerald-600">Copied</span>
     {/if}
   </div>
 
-  <div class="relative p-3 sm:p-5">
+  <div class="relative">
     <div
-      class="overflow-x-auto rounded-xl bg-slate-950 px-4 py-4 pr-14 font-mono text-sm text-slate-100 shadow-inner shadow-black/20"
+      class="overflow-x-auto rounded-md bg-slate-950 px-3 py-2.5 pr-12 font-mono text-xs text-slate-100"
     >
       <span class="text-zig-300">$</span>
       <span class="ml-2">{installCommand}</span>
@@ -46,7 +43,7 @@
       type="button"
       aria-label="Copy install command"
       onclick={copyInstall}
-      class="absolute right-6 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-lg bg-slate-800 p-2 text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zig-400"
+      class="absolute right-1.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zig-400"
     >
       {#if copied}
         <Check class="w-4 h-4 text-green-400" />

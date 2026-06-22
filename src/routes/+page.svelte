@@ -38,83 +38,84 @@
   {@html '<script type="application/ld+json">' + homeJsonLd + '<\/script>'}
 </svelte:head>
 
-<!-- Gradient hero -->
-<section class="relative overflow-hidden bg-gradient-to-br from-zig-400 via-orange-600 to-fuchsia-700">
-  <div class="pointer-events-none absolute -left-20 -top-40 h-[420px] w-[420px] rounded-full bg-white/10"></div>
-  <div class="pointer-events-none absolute -bottom-28 right-[8%] h-64 w-64 rounded-full bg-white/[0.08]"></div>
-  <div class="pointer-events-none absolute -top-10 left-[35%] h-80 w-0.5 rotate-[35deg] bg-white/15"></div>
-  <div class="pointer-events-none absolute top-6 left-[64%] h-80 w-0.5 rotate-[35deg] bg-white/15"></div>
-
-  <div class="relative mx-auto max-w-7xl px-6 sm:px-10 py-16 text-center sm:py-20">
-    <h1 class="text-4xl font-extrabold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-6xl">
-      Find your next<br />Zig package
-    </h1>
-    <p class="mx-auto mt-4 max-w-xl text-lg text-white/90">
-      Discover libraries, applications and tools across the Zig ecosystem.
-    </p>
-
-    <form onsubmit={handleSearch} class="mx-auto mt-8 flex max-w-2xl rounded-xl shadow-xl">
-      <div class="relative flex-1">
-        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-          <Search class="h-5 w-5 text-slate-400" />
-        </div>
-        <input
-          bind:value={searchQuery}
-          type="search"
-          placeholder="Search {data.stats.totalPackages.toLocaleString()} packages..."
-          class="h-14 w-full rounded-l-xl border-0 bg-white pl-12 pr-4 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-zig-300"
-        />
-      </div>
-      <button
-        type="submit"
-        class="shrink-0 rounded-r-xl bg-slate-900 px-7 text-[15px] font-semibold text-white transition-colors hover:bg-black"
-      >
-        Search
-      </button>
-    </form>
-  </div>
-</section>
-
 <div class="mx-auto max-w-7xl px-6 sm:px-10 py-10">
-  <!-- Stat counters -->
-  <div class="grid grid-cols-2 gap-6 border-b border-slate-100 pb-8 lg:grid-cols-4">
-    <div class="flex items-center gap-3.5">
-      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-zig-400 text-white">
-        <Package class="h-5 w-5" />
-      </div>
+  <section class="rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-center">
       <div>
-        <div class="text-2xl font-extrabold tracking-tight">{data.stats.totalPackages.toLocaleString()}</div>
-        <div class="text-[13px] text-slate-500">Packages</div>
+        <div class="mb-3 font-mono text-[11px] uppercase tracking-wide text-zig-700">
+          Zig package discovery
+        </div>
+        <h1 class="max-w-2xl text-4xl font-semibold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl">
+          Find your next Zig package
+        </h1>
+        <p class="mt-4 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base sm:leading-7">
+          Discover libraries, applications and tools across the Zig ecosystem.
+        </p>
+
+        <form
+          onsubmit={handleSearch}
+          class="mt-7 flex max-w-2xl rounded-lg border border-slate-200 bg-white"
+        >
+          <div class="relative flex-1">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <Search class="h-4 w-4 text-slate-400" />
+            </div>
+            <input
+              bind:value={searchQuery}
+              type="search"
+              placeholder="Search {data.stats.totalPackages.toLocaleString()} packages..."
+              class="h-11 w-full rounded-l-lg border-0 bg-white pl-9 pr-3 text-sm text-slate-900 placeholder:italic placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-zig-400"
+            />
+          </div>
+          <button
+            type="submit"
+            class="shrink-0 rounded-r-lg border-l border-slate-200 bg-slate-950 px-5 font-mono text-xs font-medium text-white transition-colors hover:bg-slate-800"
+          >
+            Search
+          </button>
+        </form>
       </div>
+
+      <dl class="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200">
+        <div class="bg-white p-4">
+          <dt class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-400">
+            <Package class="h-3.5 w-3.5 text-zig-500" />
+            Packages
+          </dt>
+          <dd class="mt-2 font-mono text-xl font-bold text-slate-900">
+            {data.stats.totalPackages.toLocaleString()}
+          </dd>
+        </div>
+        <div class="bg-white p-4">
+          <dt class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-400">
+            <Star class="h-3.5 w-3.5 text-zig-500" fill="currentColor" />
+            Stars
+          </dt>
+          <dd class="mt-2 font-mono text-xl font-bold text-slate-900">
+            {formatNumber(data.stats.totalStars)}
+          </dd>
+        </div>
+        <div class="bg-white p-4">
+          <dt class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-400">
+            <Library class="h-3.5 w-3.5 text-indigo-600" />
+            Libraries
+          </dt>
+          <dd class="mt-2 font-mono text-xl font-bold text-slate-900">
+            {data.stats.totalLibraries.toLocaleString()}
+          </dd>
+        </div>
+        <div class="bg-white p-4">
+          <dt class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wide text-slate-400">
+            <AppWindow class="h-3.5 w-3.5 text-indigo-600" />
+            Applications
+          </dt>
+          <dd class="mt-2 font-mono text-xl font-bold text-slate-900">
+            {data.stats.totalApplications.toLocaleString()}
+          </dd>
+        </div>
+      </dl>
     </div>
-    <div class="flex items-center gap-3.5">
-      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-zig-400 text-white">
-        <Star class="h-5 w-5" fill="currentColor" />
-      </div>
-      <div>
-        <div class="text-2xl font-extrabold tracking-tight">{formatNumber(data.stats.totalStars)}</div>
-        <div class="text-[13px] text-slate-500">Total stars</div>
-      </div>
-    </div>
-    <div class="flex items-center gap-3.5">
-      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-white">
-        <Library class="h-5 w-5" />
-      </div>
-      <div>
-        <div class="text-2xl font-extrabold tracking-tight">{data.stats.totalLibraries.toLocaleString()}</div>
-        <div class="text-[13px] text-slate-500">Libraries</div>
-      </div>
-    </div>
-    <div class="flex items-center gap-3.5">
-      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-white">
-        <AppWindow class="h-5 w-5" />
-      </div>
-      <div>
-        <div class="text-2xl font-extrabold tracking-tight">{data.stats.totalApplications.toLocaleString()}</div>
-        <div class="text-[13px] text-slate-500">Applications</div>
-      </div>
-    </div>
-  </div>
+  </section>
 
   {#if data.popular.length === 0}
     <div class="py-20 text-center">

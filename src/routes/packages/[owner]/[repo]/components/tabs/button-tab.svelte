@@ -11,8 +11,8 @@
 
   let activeCn = $derived(
     active
-      ? "bg-white text-slate-950 shadow-sm ring-1 ring-slate-200"
-      : "text-slate-500 hover:bg-white/70 hover:text-slate-900",
+      ? "border-zig-400/50 bg-zig-500/10 text-zig-700"
+      : "border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-900",
   );
 </script>
 
@@ -21,7 +21,7 @@
   {...rest}
   role="tab"
   aria-selected={active}
-  class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zig-500 {activeCn}"
+  class="inline-flex h-6 cursor-pointer items-center justify-center gap-1.5 rounded-sm border px-1.5 font-mono text-xs whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zig-500 {activeCn}"
 >
   {@render children()}
 </button>

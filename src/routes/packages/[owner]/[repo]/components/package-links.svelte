@@ -15,7 +15,7 @@
   const sourceLabel = $derived(source === "codeberg" ? "Codeberg" : "GitHub");
 </script>
 
-<div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+<div class="space-y-4 rounded-lg border border-slate-200 bg-white p-3.5">
   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">
     Links
   </h3>
