@@ -3,17 +3,44 @@
   <meta name="description" content="ZigPkg Cookie Policy — how we use cookies and similar technologies." />
 </svelte:head>
 
-<!-- Hero -->
-<div class="-mx-[calc((100vw-100%)/2)] bg-slate-900 text-white px-4 py-16 mb-12">
-  <div class="container mx-auto">
-    <p class="text-zig-400 text-sm font-semibold uppercase tracking-widest mb-3">Legal</p>
-    <h1 class="text-4xl font-bold mb-4">Cookie Policy</h1>
-    <p class="text-slate-400 text-sm">Last updated: March 17, 2026</p>
+<section class="border-b border-zig-100 bg-zig-50">
+  <div class="mx-auto max-w-7xl px-6 py-12 sm:px-10 sm:py-14">
+    <p class="mb-3 font-mono text-[11px] font-semibold uppercase tracking-wide text-zig-700">
+      Legal document
+    </p>
+    <h1 class="text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+      Cookie Policy
+    </h1>
+    <p class="mt-4 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+      What cookies ZigPkg uses, why they exist, and how you can control them in your browser.
+    </p>
+    <div class="mt-5 flex flex-wrap gap-2 font-mono text-[11px] text-slate-500">
+      <span class="rounded bg-white px-2 py-1 ring-1 ring-zig-100">Last updated: March 17, 2026</span>
+      <span class="rounded bg-white px-2 py-1 ring-1 ring-zig-100">No advertising cookies</span>
+    </div>
   </div>
-</div>
+</section>
 
-<!-- Content -->
-<div class="max-w-4xl mx-auto prose prose-slate">
+<div class="mx-auto max-w-7xl px-6 py-10 sm:px-10">
+  <div class="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start">
+    <aside class="rounded-lg border border-slate-200 bg-white p-4 lg:sticky lg:top-20">
+      <p class="px-2 font-mono text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+        Legal
+      </p>
+      <nav class="mt-3 space-y-1 text-sm">
+        <a href="/privacy" class="block rounded-md px-3 py-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
+          Privacy Policy
+        </a>
+        <a href="/terms" class="block rounded-md px-3 py-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
+          Terms of Service
+        </a>
+        <a href="/cookie" class="block rounded-md bg-zig-100 px-3 py-2 font-medium text-zig-700">
+          Cookie Policy
+        </a>
+      </nav>
+    </aside>
+
+    <article class="prose prose-slate max-w-none rounded-lg border border-slate-200 bg-white p-6 sm:p-8 prose-headings:font-bold prose-a:text-zig-600 prose-a:no-underline hover:prose-a:underline">
   <p class="lead">
     This Cookie Policy explains what cookies are, which cookies ZigPkg uses, and how you can
     control them. By using <strong>zigpkg.dev</strong> you consent to our use of cookies as
@@ -132,4 +159,6 @@
       GitHub repository
     </a>.
   </p>
+    </article>
+  </div>
 </div>

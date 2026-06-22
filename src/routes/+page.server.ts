@@ -3,7 +3,8 @@ import {
 	getStats,
 	getNewPackages,
 	getMostPopular,
-	getRecentlyUpdated
+	getRecentlyUpdated,
+	getTopTopics
 } from '$lib/server/packages/queries';
 
 type Card = {
@@ -40,11 +41,12 @@ function toCard(pkg: {
 }
 
 export const load: PageServerLoad = async ({ setHeaders }) => {
-	const [stats, newPkgs, popularPkgs, updatedPkgs] = await Promise.all([
+	const [stats, newPkgs, popularPkgs, updatedPkgs, topics] = await Promise.all([
 		getStats(),
 		getNewPackages(8),
 		getMostPopular(8),
-		getRecentlyUpdated(8)
+		getRecentlyUpdated(8),
+		getTopTopics(6)
 	]);
 
 	setHeaders({
@@ -58,6 +60,7 @@ export const load: PageServerLoad = async ({ setHeaders }) => {
 			totalApplications: stats?.totalApplications ?? 0,
 			totalStars: stats?.totalStars ?? 0
 		},
+		topics,
 		newest: newPkgs.map(toCard),
 		popular: popularPkgs.map(toCard),
 		updated: updatedPkgs.map(toCard)

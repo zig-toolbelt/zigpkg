@@ -38,15 +38,84 @@
   {@html '<script type="application/ld+json">' + homeJsonLd + '<\/script>'}
 </svelte:head>
 
-<section
-  class="relative overflow-hidden border-b border-zig-100 bg-zig-50"
->
+<section class="relative overflow-hidden border-b border-zig-100 bg-white">
+  <!-- Warm landscape illustration anchored to the bottom -->
   <div
-    class="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(circle_at_1px_1px,rgb(245_158_11_/_0.16)_1px,transparent_0)] [background-size:26px_26px]"
-  ></div>
-  <div class="pointer-events-none absolute left-1/2 top-1/2 h-[28rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/70 blur-3xl"></div>
+    class="pointer-events-none absolute inset-x-0 bottom-0 h-56 sm:h-72"
+    aria-hidden="true"
+  >
+    <svg
+      class="h-full w-full"
+      viewBox="0 0 1440 320"
+      preserveAspectRatio="xMidYMax slice"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <radialGradient id="heroSun" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffd591" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#ffd591" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="hillFront" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f08c1e" />
+          <stop offset="100%" stop-color="#e0700f" />
+        </linearGradient>
+      </defs>
 
-  <div class="relative mx-auto max-w-7xl px-6 py-16 sm:px-10 sm:py-20">
+      <circle cx="720" cy="120" r="130" fill="url(#heroSun)" />
+
+      <path
+        d="M0,206 C 320,168 560,196 760,190 C 1000,182 1240,160 1440,196 L1440,320 L0,320 Z"
+        fill="#fde4c4"
+      />
+      <path
+        d="M0,236 C 280,206 600,240 880,228 C 1120,218 1320,210 1440,232 L1440,320 L0,320 Z"
+        fill="#fbcd96"
+      />
+      <path
+        d="M0,266 C 360,238 720,272 1040,262 C 1240,256 1360,250 1440,264 L1440,320 L0,320 Z"
+        fill="#f7a41d"
+      />
+      <path
+        d="M0,292 C 420,272 820,296 1160,286 C 1300,282 1380,280 1440,288 L1440,320 L0,320 Z"
+        fill="url(#hillFront)"
+      />
+
+      <g>
+        <path d="M150,262 L150,196" stroke="#7a4a25" stroke-width="6" stroke-linecap="round" />
+        <circle cx="150" cy="176" r="34" fill="#e0700f" />
+        <circle cx="126" cy="194" r="24" fill="#ef8a1c" />
+        <circle cx="174" cy="192" r="26" fill="#f59324" />
+      </g>
+      <g>
+        <path d="M1296,264 L1296,198" stroke="#7a4a25" stroke-width="6" stroke-linecap="round" />
+        <circle cx="1296" cy="178" r="36" fill="#e0700f" />
+        <circle cx="1272" cy="196" r="24" fill="#ef8a1c" />
+        <circle cx="1322" cy="194" r="26" fill="#f59324" />
+      </g>
+      <g>
+        <path d="M1086,272 L1086,234" stroke="#7a4a25" stroke-width="5" stroke-linecap="round" />
+        <circle cx="1086" cy="222" r="22" fill="#ef8a1c" />
+      </g>
+
+      <g>
+        <path d="M70,316 L70,284" stroke="#7a4a25" stroke-width="3" />
+        <circle cx="70" cy="278" r="9" fill="#e0301a" />
+        <circle cx="60" cy="282" r="7" fill="#cc2a16" />
+        <circle cx="80" cy="282" r="7" fill="#cc2a16" />
+        <circle cx="70" cy="278" r="3" fill="#5b1a10" />
+      </g>
+      <g>
+        <path d="M1380,318 L1380,286" stroke="#7a4a25" stroke-width="3" />
+        <circle cx="1380" cy="280" r="9" fill="#e0301a" />
+        <circle cx="1370" cy="284" r="7" fill="#cc2a16" />
+        <circle cx="1390" cy="284" r="7" fill="#cc2a16" />
+        <circle cx="1380" cy="280" r="3" fill="#5b1a10" />
+      </g>
+    </svg>
+  </div>
+
+  <div class="relative mx-auto max-w-7xl px-6 pt-16 pb-44 sm:px-10 sm:pt-20 sm:pb-56">
     <div class="mx-auto max-w-3xl text-center">
       <div class="mb-3 font-mono text-[11px] font-semibold uppercase tracking-wide text-zig-700">
         Zig package discovery
@@ -69,17 +138,39 @@
           <input
             bind:value={searchQuery}
             type="search"
-            placeholder="Search {data.stats.totalPackages.toLocaleString()} packages..."
+            name="q"
+            aria-label="Search Zig packages"
+            placeholder="Search by name, topic, or description..."
             class="h-14 w-full rounded-l-lg border-0 bg-white pl-10 pr-3 text-sm text-slate-900 placeholder:italic placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-zig-400"
           />
         </div>
         <button
           type="submit"
-          class="shrink-0 rounded-r-lg border-l border-slate-200 bg-slate-950 px-6 font-mono text-xs font-medium text-white transition-colors hover:bg-slate-800"
+          class="shrink-0 rounded-r-lg bg-zig-400 px-6 font-mono text-xs font-medium text-slate-900 transition-colors hover:bg-zig-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zig-500 focus-visible:ring-offset-2"
         >
           Search
         </button>
       </form>
+
+      <div class="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs">
+        {#if data.topics.length > 0}
+          <span class="font-mono text-slate-400">Popular:</span>
+          {#each data.topics as topic (topic)}
+            <a
+              href="/search?q={encodeURIComponent(topic)}"
+              class="rounded-full border border-zig-200 bg-white/80 px-3 py-1 font-mono text-slate-600 backdrop-blur-sm transition-colors hover:border-zig-400 hover:bg-white hover:text-zig-700"
+            >
+              {topic}
+            </a>
+          {/each}
+        {/if}
+        <a
+          href="/packages"
+          class="rounded-full px-3 py-1 font-mono font-medium text-zig-600 transition-colors hover:text-zig-700"
+        >
+          Browse all →
+        </a>
+      </div>
     </div>
   </div>
 </section>

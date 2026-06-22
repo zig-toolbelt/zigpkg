@@ -42,6 +42,7 @@ interface QueryOptions {
 	search?: string;
 	letter?: string;
 	owner?: string;
+	topic?: string;
 }
 
 function getSortColumn(sort: SortOption) {
@@ -60,17 +61,31 @@ function getSortColumn(sort: SortOption) {
 }
 
 function buildConditions(options: QueryOptions) {
-	const { packageType, search, letter, owner } = options;
+	const { packageType, search, letter, owner, topic } = options;
 	const conditions = [];
 
 	if (packageType) {
 		conditions.push(eq(packages.packageType, packageType));
 	}
 
+	if (topic) {
+		conditions.push(sql`jsonb_exists(${packages.topics}, ${topic})`);
+	}
+
 	if (search) {
-		const escaped = escapeIlike(search);
+		const pattern = `%${escapeIlike(search)}%`;
 		conditions.push(
-			or(ilike(packages.name, `%${escaped}%`), ilike(packages.description, `%${escaped}%`))
+			or(
+				ilike(packages.name, pattern),
+				ilike(packages.description, pattern),
+				sql`exists (
+					select 1
+					from jsonb_array_elements_text(
+						case when jsonb_typeof(${packages.topics}) = 'array' then ${packages.topics} else '[]'::jsonb end
+					) as t(topic)
+					where t.topic ilike ${pattern}
+				)`
+			)
 		);
 	}
 
@@ -206,6 +221,43 @@ export async function getOwnerCanonical(owner: string): Promise<string | undefin
 		.limit(1);
 
 	return result?.username;
+}
+
+// Generic/meta tags that carry no discovery value as quick filters.
+// The dominant "zig*" family (zig, ziglang, zig-package, zig-lib, ...) is
+// filtered in SQL since it is redundant noise in a Zig-only registry.
+const TOPIC_BLOCKLIST = new Set([
+	'library',
+	'application',
+	'package-manager',
+	'awesome',
+	'awesome-list',
+	'awesome-zig'
+]);
+
+// minCount keeps only topics shared by multiple packages, dropping the long
+// tail of one-off tags (owner names, niche labels) that add noise, not signal.
+export async function getTopTopics(limit = 6, minCount = 2): Promise<string[]> {
+	const rows = await db.execute<{ topic: string }>(sql`
+		select lower(topic) as topic, count(*)::int as count
+		from (
+			select ${packages.topics} as topics
+			from ${packages}
+			where jsonb_typeof(${packages.topics}) = 'array'
+		) as p
+		cross join lateral jsonb_array_elements_text(p.topics) as topic
+		where char_length(topic) between 2 and 30
+			and lower(topic) not like 'zig%'
+		group by lower(topic)
+		having count(*) >= ${minCount}
+		order by 2 desc, 1 asc
+		limit ${limit * 4}
+	`);
+
+	return rows
+		.map((row) => row.topic)
+		.filter((topic) => !TOPIC_BLOCKLIST.has(topic))
+		.slice(0, limit);
 }
 
 export async function getStats() {

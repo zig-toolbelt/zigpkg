@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { getPackages, getFilteredPackageCount } from '$lib/server/packages/queries';
+import { getPackages, getFilteredPackageCount, getTopTopics } from '$lib/server/packages/queries';
 import type { SortOption } from '$lib/server/packages/queries';
 import type { PackageType } from '$lib/types/package';
 
@@ -10,17 +10,19 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
 	const sort = (url.searchParams.get('sort') ?? 'stars') as SortOption;
 	const letter = url.searchParams.get('letter') ?? undefined;
 	const type = (url.searchParams.get('type') ?? undefined) as PackageType | undefined;
+	const topic = url.searchParams.get('topic')?.toLowerCase() || undefined;
 
 	const validSorts: SortOption[] = ['stars', 'name', 'new', 'updated'];
 	const safeSort: SortOption = validSorts.includes(sort) ? sort : 'stars';
 
 	const safeLetter = letter && /^[a-zA-Z]$/.test(letter) ? letter.toUpperCase() : undefined;
 
-	const options = { sort: safeSort, packageType: type, letter: safeLetter };
+	const options = { sort: safeSort, packageType: type, letter: safeLetter, topic };
 
-	const [pkgs, totalCount] = await Promise.all([
+	const [pkgs, totalCount, topics] = await Promise.all([
 		getPackages({ ...options, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
-		getFilteredPackageCount(options)
+		getFilteredPackageCount(options),
+		getTopTopics(12)
 	]);
 
 	setHeaders({
@@ -42,9 +44,11 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
 			updatedAt: pkg.pushedAt.toISOString()
 		})),
 		totalCount,
+		topics,
 		page,
 		sort: safeSort,
 		letter: safeLetter ?? null,
-		type: type ?? null
+		type: type ?? null,
+		topic: topic ?? null
 	};
 };
