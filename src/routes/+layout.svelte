@@ -32,16 +32,9 @@
   <meta name="twitter:image" content={defaultOgImage} />
 </svelte:head>
 
-<div class="min-h-screen flex flex-col text-slate-900 zp-grid">
+<div class="min-h-screen flex flex-col bg-white text-slate-900">
   <Header />
-  <main
-    class="relative flex-1 w-full mx-auto max-w-7xl border-x border-slate-200 bg-white px-6 py-12 sm:px-10"
-  >
-    <!-- corner diamonds where the column rules meet -->
-    <span class="pointer-events-none absolute -top-[3px] -left-[3px] size-1.5 rotate-45 border border-slate-300 bg-white"></span>
-    <span class="pointer-events-none absolute -top-[3px] -right-[3px] size-1.5 rotate-45 border border-slate-300 bg-white"></span>
-    <span class="pointer-events-none absolute -bottom-[3px] -left-[3px] size-1.5 rotate-45 border border-slate-300 bg-white"></span>
-    <span class="pointer-events-none absolute -bottom-[3px] -right-[3px] size-1.5 rotate-45 border border-slate-300 bg-white"></span>
+  <main class="flex-1 w-full">
     {@render children()}
   </main>
   <Footer />

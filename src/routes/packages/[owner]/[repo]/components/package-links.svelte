@@ -15,7 +15,7 @@
   const sourceLabel = $derived(source === "codeberg" ? "Codeberg" : "GitHub");
 </script>
 
-<div class="bg-white border border-gray-200 rounded-sm p-5 space-y-4">
+<div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">
     Links
   </h3>
@@ -29,7 +29,7 @@
       <ExternalLink class="w-4 h-4 shrink-0" />
       <span>Repository</span>
       <span
-        class="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-gray-100 text-slate-500 border border-gray-200"
+        class="ml-auto rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500"
       >
         {sourceLabel}
       </span>

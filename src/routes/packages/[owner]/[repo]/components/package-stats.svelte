@@ -7,7 +7,7 @@
   }: { stars: number; forks: number; openIssues: number } = $props();
 </script>
 
-<div class="bg-white border border-gray-200 rounded-sm p-5">
+<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
     Stats
   </h3>

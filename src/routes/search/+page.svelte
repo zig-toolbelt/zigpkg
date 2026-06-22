@@ -6,6 +6,7 @@
 	const totalPages = $derived(Math.ceil(data.totalCount / 20));
 </script>
 
+<div class="mx-auto max-w-7xl px-6 sm:px-10 py-10">
 <!-- Results count -->
 {#if data.q}
 	<p class="mb-5 font-mono text-xs text-slate-400">
@@ -47,3 +48,4 @@
 		</div>
 	{/if}
 {/if}
+</div>

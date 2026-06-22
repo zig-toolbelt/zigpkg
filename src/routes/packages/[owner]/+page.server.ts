@@ -3,15 +3,18 @@ import { error, redirect } from '@sveltejs/kit';
 import {
 	getPackages,
 	getFilteredPackageCount,
+	getOwnerStats,
 	getOwnerCanonical
 } from '$lib/server/packages/queries';
+import { ownerUrl } from '$lib/providers';
 
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const { owner } = params;
 
-	let [pkgs, totalCount] = await Promise.all([
-		getPackages({ owner }),
-		getFilteredPackageCount({ owner })
+	let [pkgs, totalCount, stats] = await Promise.all([
+		getPackages({ owner, limit: 100 }),
+		getFilteredPackageCount({ owner }),
+		getOwnerStats(owner)
 	]);
 
 	if (totalCount === 0) {
@@ -26,10 +29,15 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 		'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600'
 	});
 
+	const source = pkgs[0].source;
+
 	return {
 		owner,
 		ownerAvatarUrl: pkgs[0].ownerAvatarUrl,
+		source,
+		profileUrl: ownerUrl(source, owner),
 		totalCount,
+		totalStars: stats.totalStars,
 		packages: pkgs.map((pkg) => ({
 			name: pkg.name,
 			fullName: pkg.fullName,
@@ -37,6 +45,7 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 			owner: pkg.owner,
 			description: pkg.description || '',
 			version: pkg.version || 'latest',
+			packageType: pkg.packageType,
 			stars: pkg.stars,
 			openIssues: pkg.openIssues,
 			pushedAt: pkg.pushedAt.toISOString(),

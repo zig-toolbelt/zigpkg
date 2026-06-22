@@ -38,6 +38,7 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
 			stars: pkg.stars,
 			forks: pkg.forks,
 			packageType: pkg.packageType,
+			repositoryUrl: pkg.repositoryUrl,
 			updatedAt: pkg.pushedAt.toISOString()
 		})),
 		totalCount,

@@ -119,6 +119,18 @@ export async function getFilteredPackageCount(options: QueryOptions = {}): Promi
 	return result?.count ?? 0;
 }
 
+export async function getOwnerStats(owner: string): Promise<{ totalStars: number }> {
+	const [result] = await db
+		.select({
+			totalStars: sql<number>`coalesce(sum(${packages.stars}), 0)::int`
+		})
+		.from(packages)
+		.innerJoin(users, eq(packages.ownerId, users.id))
+		.where(eq(users.username, owner));
+
+	return { totalStars: result?.totalStars ?? 0 };
+}
+
 export async function getMostPopular(limit = 6) {
 	return db
 		.select(packageSelect)

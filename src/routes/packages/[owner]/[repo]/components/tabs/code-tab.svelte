@@ -15,7 +15,7 @@
   } = $props();
 </script>
 
-<div class="bg-white border border-gray-200 rounded-sm p-6">
+<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
   <h2 class="text-lg font-bold text-slate-900 mb-4">Source Files</h2>
   {#if files.length > 0}
     <div class="border border-gray-100 rounded-xl overflow-hidden">

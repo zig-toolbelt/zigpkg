@@ -19,11 +19,13 @@ export const load: PageServerLoad = async ({ url }) => {
 			id: pkg.id,
 			name: pkg.name,
 			fullName: pkg.fullName,
+			owner: pkg.owner,
 			description: pkg.description ?? '',
 			version: pkg.version ?? 'latest',
 			stars: pkg.stars,
 			forks: pkg.forks,
-			packageType: pkg.packageType
+			packageType: pkg.packageType,
+			repositoryUrl: pkg.repositoryUrl
 		})),
 		totalCount,
 		page,

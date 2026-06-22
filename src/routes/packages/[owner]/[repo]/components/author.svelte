@@ -1,21 +1,23 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
+
   type Props = {
     owner: string;
     ownerAvatarUrl: string | null;
-    ownerHtmlUrl: string;
+    ownerHtmlUrl?: string;
   };
 
   let { owner, ownerAvatarUrl, ownerHtmlUrl }: Props = $props();
+
+  const ownerHref = $derived(ownerHtmlUrl ?? resolve(`/packages/${owner}`));
 </script>
 
-<div class="bg-white border border-gray-200 rounded-sm p-5">
+<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
   <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
     Owner
   </h3>
   <a
-    href={ownerHtmlUrl}
-    target="_blank"
-    rel="noopener"
+    href={ownerHref}
     class="flex items-center gap-3 group"
   >
     {#if ownerAvatarUrl}
