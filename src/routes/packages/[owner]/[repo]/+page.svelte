@@ -13,6 +13,8 @@
 
   import ButtonTab from "./components/tabs/button-tab.svelte";
   import Activity from "./components/activity.svelte";
+  import Badge from "$lib/components/ui/badge.svelte";
+  import { badgeVariants } from "$lib/components/ui/badge-variants";
   import { formatRelativeDate } from "$lib/utils/formatRelativeDate";
   import { formatNumber } from "$lib/utils/formatNumber";
   import { buildCanonical } from "$lib/seo";
@@ -153,7 +155,7 @@
               {#each heroTopics as topic (topic)}
                 <a
                   href="/search?q={encodeURIComponent(topic)}"
-                  class="rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-medium text-slate-500 transition-colors hover:bg-zig-100 hover:text-zig-700"
+                  class={badgeVariants({ variant: "topic" })}
                 >
                   {topic}
                 </a>
@@ -208,7 +210,14 @@
                 License
               </dt>
               <dd class="mt-1 truncate font-mono text-sm font-semibold text-slate-900">
-                {pkg.license || "Unknown"}
+                {#if pkg.license}
+                  {pkg.license}
+                {:else if data.licenseFileUrl}
+                  <a href={data.licenseFileUrl} target="_blank" rel="noopener"
+                     class="underline decoration-dotted hover:text-zig-700">Unknown</a>
+                {:else}
+                  Unknown
+                {/if}
               </dd>
             </div>
             <div class="bg-white p-3">
@@ -258,24 +267,14 @@
       >
         Versions
         {#if data.tags.length > 0}
-          <span
-            class="text-xs bg-gray-100 text-slate-500 px-2 py-0.5 rounded-full"
-          >
-            {data.tags.length}
-          </span>
+          <Badge variant="muted">{data.tags.length}</Badge>
         {/if}
       </ButtonTab>
       <ButtonTab
         active={activeTab === "dependencies"}
         onclick={() => (activeTab = "dependencies")}
       >
-        Dependencies {#if data.dependencies.length > 0}
-          <span
-            class="text-xs bg-gray-100 text-slate-500 px-2 py-0.5 rounded-full"
-          >
-            {data.dependencies.length}</span
-          >
-        {/if}
+        Dependencies {#if data.dependencies.length > 0}<Badge variant="muted">{data.dependencies.length}</Badge>{/if}
       </ButtonTab>
     </div>
   </div>

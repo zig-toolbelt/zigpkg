@@ -11,6 +11,10 @@ export const badgeVariants = tv({
       destructive:
         "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
       outline: "text-foreground",
+      zig: "rounded-full border-zig-200 bg-zig-50 font-mono text-[11px] text-zig-800",
+      topic: "rounded-full border-transparent bg-slate-100 px-2 text-[11px] font-medium text-slate-500 hover:bg-zig-100 hover:text-zig-700",
+      subtle: "rounded-full border-transparent bg-zig-100 text-zig-700",
+      muted: "rounded-full border-transparent bg-gray-100 text-slate-500",
     },
   },
   defaultVariants: {

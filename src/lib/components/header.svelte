@@ -1,10 +1,13 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { onMount } from "svelte";
   import { Search, X } from "lucide-svelte";
 
   import Logo from "$lib/components/logo.svelte";
   import SearchBar from "$lib/components/search-bar.svelte";
+  import Badge from "$lib/components/ui/badge.svelte";
+
+  let { lastSyncedAt = null }: { lastSyncedAt: string | null } = $props();
 
   let mobileSearchOpen = $state(false);
   let scrolled = $state(false);
@@ -38,7 +41,7 @@
       <Logo />
 
       <!-- Search (hidden on home) -->
-      {#if $page.url.pathname !== "/"}
+      {#if page.url.pathname !== "/"}
         <div class="hidden flex-1 max-w-md md:block">
           <SearchBar />
         </div>
@@ -46,11 +49,19 @@
 
       <!-- Right: nav + socials -->
       <div class="flex items-center gap-1.5 shrink-0">
+        <div class="hidden items-center gap-1.5 lg:flex">
+          <Badge variant="zig">v{APP_VERSION}</Badge>
+          {#if lastSyncedAt}
+            <Badge variant="zig">synced: {lastSyncedAt}</Badge>
+          {/if}
+        </div>
+        <div class="hidden h-4 w-px bg-slate-200 lg:block"></div>
+
         <nav class="hidden items-center gap-1 sm:flex" aria-label="Primary navigation">
           {#each navItems as item (item.href)}
             <a
               href={item.href}
-              class="rounded-md px-3 py-2 font-mono text-xs font-medium transition-colors {$page.url.pathname.startsWith(
+              class="rounded-md px-3 py-2 font-mono text-xs font-medium transition-colors {page.url.pathname.startsWith(
                 item.match,
               )
                 ? 'bg-zig-50 text-zig-700'
@@ -61,7 +72,7 @@
           {/each}
         </nav>
 
-        {#if $page.url.pathname !== "/"}
+        {#if page.url.pathname !== "/"}
           <button
             type="button"
             class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 md:hidden"
@@ -98,7 +109,7 @@
       </div>
     </div>
 
-    {#if $page.url.pathname !== "/" && mobileSearchOpen}
+    {#if page.url.pathname !== "/" && mobileSearchOpen}
       <div class="border-t border-slate-100 py-3 md:hidden">
         <SearchBar />
       </div>

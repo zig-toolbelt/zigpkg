@@ -42,6 +42,10 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 
 	const topics = pkg.topics ?? [];
 
+	const LICENSE_NAMES = new Set(['LICENSE', 'LICENSE.MD', 'LICENSE.TXT', 'LICENSE.RST', 'LICENCE', 'COPYING']);
+	const licenseFile = fileList.find((f) => LICENSE_NAMES.has(f.name.toUpperCase()));
+	const licenseFileUrl = licenseFile?.htmlUrl ?? null;
+
 	setHeaders(
 		contentDegraded
 			? { 'Cache-Control': 'no-store' }
@@ -81,6 +85,7 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 					minimumZigVersion: zonInfo.minimum_zig_version
 				}
 			: null,
-		contentDegraded
+		contentDegraded,
+		licenseFileUrl
 	};
 };

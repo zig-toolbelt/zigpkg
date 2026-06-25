@@ -1,144 +1,79 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
-  import { ArrowRight, CalendarDays, ChevronLeft, Clock3, Newspaper, Tag } from "lucide-svelte";
+  import { ArrowRight, CalendarDays, ChevronLeft, Clock3, Tag } from "lucide-svelte";
 
   let { params }: PageProps = $props();
 
   const posts = [
     {
-      slug: "designing-a-package-registry",
-      title: "Designing a package registry for the Zig ecosystem",
+      slug: "introducing-zigpkg",
+      title: "Introducing zigpkg.dev",
       excerpt:
-        "A look at the product decisions behind zigpkg: technical density, repository trust signals, and a UI that stays close to developer workflows.",
-      category: "Product",
-      date: "Mar 24, 2026",
-      readTime: "6 min read",
-      author: "ZigPkg team",
-      sections: [
-        {
-          title: "Start with developer intent",
-          body:
-            "A registry page has to answer one question quickly: can I use this dependency with confidence? That means the page should prioritize current version, activity, license, compatibility, and installation before decorative content.",
-        },
-        {
-          title: "Keep the source visible",
-          body:
-            "Packages are still maintained in repositories, so source identity matters. GitHub and Codeberg signals belong near the title, not hidden behind secondary panels.",
-        },
-        {
-          title: "Use hierarchy instead of density",
-          body:
-            "Technical products need dense information, but density works only when hierarchy is clear. The current design uses compact cards, mono metadata, and a restrained Zig palette to keep scanning fast.",
-        },
-      ],
-    },
-    {
-      slug: "how-to-evaluate-a-zig-package",
-      title: "How to evaluate a Zig package before adding it",
-      excerpt:
-        "Use activity, license, minimum Zig version, release cadence, and README quality as practical signals.",
-      category: "Guides",
-      date: "Mar 18, 2026",
-      readTime: "4 min read",
-      author: "Registry notes",
-      sections: [
-        {
-          title: "Check maintenance first",
-          body:
-            "Recent commits and issue volume are quick signals. They do not prove quality, but they can reveal whether maintainers are still engaged.",
-        },
-        {
-          title: "Read the examples",
-          body:
-            "A concise README example often tells you more than a long feature list. Look for realistic setup code and a clear statement of supported Zig versions.",
-        },
-        {
-          title: "Prefer clear releases",
-          body:
-            "Tagged releases make dependency updates easier to review and rollback. They also help teams discuss upgrades in pull requests.",
-        },
-      ],
-    },
-    {
-      slug: "indexing-public-repositories",
-      title: "Indexing public repositories from GitHub and Codeberg",
-      excerpt:
-        "What metadata matters for discovery and why zigpkg keeps package pages linked to their source.",
-      category: "Engineering",
-      date: "Mar 12, 2026",
-      readTime: "5 min read",
-      author: "Engineering",
-      sections: [
-        {
-          title: "Sync what users can verify",
-          body:
-            "The registry should focus on public metadata that users can trace back to a repository: description, topics, stars, issues, releases, license, and README content.",
-        },
-        {
-          title: "Normalize without hiding source",
-          body:
-            "A registry can normalize package presentation while still showing where the data came from. That balance keeps the UI useful without pretending to own the package.",
-        },
-        {
-          title: "Design for incomplete data",
-          body:
-            "Not every repository has tags, topics, or compatibility metadata. The interface should make missing data visible without making the page feel broken.",
-        },
-      ],
-    },
-    {
-      slug: "making-package-versions-easier-to-compare",
-      title: "Making package versions easier to compare",
-      excerpt:
-        "Why current version, repository activity, and Zig compatibility should live near the package title.",
-      category: "UX",
-      date: "Mar 5, 2026",
+        "We built a package registry for Zig that indexes both GitHub and Codeberg, parses build.zig.zon so you can see dependencies upfront, and syncs hourly so listings stay fresh. It's open source, actively maintained, and contributions are welcome.",
+      category: "Announcement",
+      date: "Jun 25, 2026",
       readTime: "3 min read",
-      author: "Design notes",
+      author: "zigpkg team",
       sections: [
         {
-          title: "Version is primary metadata",
+          title: "Why we built it",
           body:
-            "Developers compare versions before they compare long descriptions. The current version needs to be prominent, but still integrated with the rest of the package summary.",
+            "The company we work at uses Zig heavily in internal development. Finding packages meant spelunking through GitHub and Codeberg topic searches, which got old fast — we just wanted one place to discover things. Before writing our own we looked at zigistry.dev, aquila.red, zig.pm, and astrolabe.pm — most are either unmaintained or missing the features we needed, so we built zigpkg.dev.",
         },
         {
-          title: "Avoid detached badges",
+          title: "What it does",
           body:
-            "A large standalone badge can feel like a workaround. A compact summary panel keeps the version important while preserving the registry aesthetic.",
+            "Browse and search libraries and applications. Filter by topic, owner, type, or A–Z. Every package page renders the README with proper Zig syntax highlighting, shows stars / forks / license / version, the file tree, and version history. It also parses each repo's build.zig.zon and lists the package's dependencies — so you can see what a package pulls in before you add it. The registry indexes both GitHub and Codeberg, so packages hosted on a Forgejo instance won't be invisible. Want your package listed? Tag the repo zig-package or zig-library (libraries) / zig-program (applications) and it gets picked up automatically on the next hourly sync.",
         },
         {
-          title: "Group related signals",
+          title: "What's next",
           body:
-            "Stars, license, issues, and Zig compatibility work best as a group. Together they form a quick snapshot of package health.",
+            "This isn't a weekend throwaway — we use it internally, so it's going to stick around and keep getting maintained. The codebase is MIT-licensed and open source, and we'd love contributors: feature ideas, bug reports, pull requests, or just telling us what annoys you. Join the discussion:",
+        },
+      ],
+      links: [
+        {
+          label: "Ziggit thread",
+          url: "https://ziggit.dev/t/an-open-source-package-registry-where-you-can-browse-search-and-actually-discover-zig-libraries-and-applications/16335",
+        },
+        {
+          label: "Zig Discord",
+          url: "https://discord.com/channels/605571803288698900/1519615122463526993/1519615122463526993",
         },
       ],
     },
     {
-      slug: "what-makes-a-zig-package-discoverable",
-      title: "What makes a Zig package discoverable",
+      slug: "updates-jun-25-2026",
+      title: "Favicon, license detection, and a few first-week fixes",
       excerpt:
-        "Names, topics, descriptions, and examples help users understand a package before opening the repo.",
-      category: "Guides",
-      date: "Feb 27, 2026",
-      readTime: "4 min read",
-      author: "Registry notes",
+        "A few visible improvements landed today: a branded ZIG favicon, smarter license display that links to a repo's LICENSE file, version and last-sync badges in the header, and a shared Badge component to stop repeating pill styles across the codebase.",
+      category: "Updates",
+      date: "Jun 25, 2026",
+      readTime: "3 min read",
+      author: "zigpkg team",
       sections: [
         {
-          title: "Use plain names",
+          title: "Custom favicon",
           body:
-            "A package name should be easy to search and easy to say in a code review. Clever names can work, but descriptions need to compensate.",
+            "The browser tab was showing the default SvelteKit Svelte logo — the orange flame. Not exactly on-brand. It's now replaced with a ZIG badge: the same gold rounded square you see in the header.",
         },
         {
-          title: "Write specific descriptions",
+          title: "Smarter license display",
           body:
-            "Generic descriptions make search results hard to scan. Explain the package category, target use case, and important constraints.",
+            "Codeberg's API doesn't expose license information, so all Codeberg packages showed \"Unknown\". Same for GitHub repos without a configured SPDX identifier. Now, when the license field is empty, the package page checks whether a LICENSE, LICENSE.md, LICENCE, or COPYING file exists in the repo root — if it does, \"Unknown\" becomes a clickable link to that file. No extra API calls: the file tree is already fetched for every package page.",
         },
         {
-          title: "Add useful topics",
+          title: "Version and sync badges in the header",
           body:
-            "Topics connect packages to search behavior. Choose terms that match what users would type when looking for your library.",
+            "The header now shows two small pills on wide screens: the current app version (read from package.json at build time) and the timestamp of the last successful package sync (queried live from the database). The sync time updates on every page load, so it reflects the actual state of the index — not a stale build date.",
+        },
+        {
+          title: "Shared Badge component",
+          body:
+            "Pill badge styles were scattered across a handful of components with copy-pasted Tailwind classes. They're now consolidated into a single Badge component with named variants — zig (header meta badges), topic (clickable keyword pills), subtle (version labels), and muted (tab counters). Less drift, easier to restyle globally.",
         },
       ],
+      links: undefined,
     },
   ];
 
@@ -191,26 +126,20 @@
     <article
       class="prose prose-slate max-w-none rounded-lg border border-slate-200 bg-white p-6 sm:p-8 prose-headings:font-bold prose-a:text-zig-600 prose-a:no-underline hover:prose-a:underline"
     >
-      <div class="not-prose mb-8 rounded-lg border border-zig-200 bg-zig-50 p-5">
-        <div class="mb-4 flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-wide text-zig-700">
-          <Newspaper class="h-4 w-4" />
-          Mock article
-        </div>
-        <p class="text-sm leading-6 text-slate-600">
-          This detail page mirrors the intended article layout before a real markdown-backed blog is connected.
-        </p>
-      </div>
-
       {#each post.sections as section (section.title)}
         <h2>{section.title}</h2>
         <p>{section.body}</p>
       {/each}
 
-      <h2>What happens next</h2>
-      <p>
-        The mock content can later move into markdown files, a content collection, or a small API
-        without changing the visual structure of this page.
-      </p>
+      {#if post.links}
+        <ul>
+          {#each post.links as link (link.url)}
+            <li>
+              <a href={link.url} target="_blank" rel="noopener">{link.label}</a>
+            </li>
+          {/each}
+        </ul>
+      {/if}
     </article>
 
     <aside class="space-y-4 lg:sticky lg:top-20">
@@ -237,25 +166,27 @@
         </dl>
       </div>
 
-      <div class="rounded-lg border border-slate-200 bg-white p-4">
-        <p class="font-mono text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          Related posts
-        </p>
-        <div class="mt-4 space-y-3">
-          {#each relatedPosts as related (related.slug)}
-            <a
-              href={`/blog/${related.slug}`}
-              class="block rounded-md p-2 transition-colors hover:bg-slate-100"
-            >
-              <span class="text-sm font-medium leading-5 text-slate-900">{related.title}</span>
-              <span class="mt-1 flex items-center gap-1.5 font-mono text-[11px] text-zig-600">
-                Read post
-                <ArrowRight class="h-3.5 w-3.5" />
-              </span>
-            </a>
-          {/each}
+      {#if relatedPosts.length > 0}
+        <div class="rounded-lg border border-slate-200 bg-white p-4">
+          <p class="font-mono text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            Related posts
+          </p>
+          <div class="mt-4 space-y-3">
+            {#each relatedPosts as related (related.slug)}
+              <a
+                href={`/blog/${related.slug}`}
+                class="block rounded-md p-2 transition-colors hover:bg-slate-100"
+              >
+                <span class="text-sm font-medium leading-5 text-slate-900">{related.title}</span>
+                <span class="mt-1 flex items-center gap-1.5 font-mono text-[11px] text-zig-600">
+                  Read post
+                  <ArrowRight class="h-3.5 w-3.5" />
+                </span>
+              </a>
+            {/each}
+          </div>
         </div>
-      </div>
+      {/if}
     </aside>
   </div>
 </div>

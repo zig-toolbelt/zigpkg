@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { badgeVariants } from "$lib/components/ui/badge-variants";
+
   type Props = {
     items: string[];
   };
@@ -14,7 +16,7 @@
     {#each items as topic (topic)}
       <a
         href="/search?q={encodeURIComponent(topic)}"
-        class="rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-medium text-slate-500 transition-colors hover:bg-zig-100 hover:text-zig-700"
+        class={badgeVariants({ variant: "topic" })}
         >{topic}</a
       >
     {/each}

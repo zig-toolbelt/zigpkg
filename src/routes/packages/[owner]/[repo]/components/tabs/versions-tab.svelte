@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Badge from "$lib/components/ui/badge.svelte";
+
   let { tags }: { tags: { name: string; sha: string }[] } = $props();
 </script>
 
@@ -15,10 +17,7 @@
         <div class="flex items-center gap-3">
           <span class="font-mono font-semibold text-slate-900">{tag.name}</span>
           {#if i === 0}
-            <span
-              class="text-xs font-semibold px-2 py-0.5 rounded-full bg-zig-100 text-zig-700"
-              >latest</span
-            >
+            <Badge variant="subtle">latest</Badge>
           {/if}
         </div>
         <span class="text-xs font-mono text-slate-400"

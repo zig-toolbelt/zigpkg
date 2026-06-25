@@ -7,7 +7,7 @@
 
   import "./layout.css";
 
-  let { children } = $props();
+  let { children, data } = $props();
 
   const canonical = $derived(buildCanonical(page.url.pathname));
   const defaultDescription =
@@ -33,7 +33,7 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-white text-slate-900">
-  <Header />
+  <Header lastSyncedAt={data.lastSyncedAt} />
   <main class="flex-1 w-full">
     {@render children()}
   </main>
