@@ -1,17 +1,17 @@
 
-FROM docker.io/oven/bun:1-alpine AS base
+FROM docker.io/node:24-alpine AS base
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json bun.lock* ./
-RUN --mount=type=cache,target=/root/.bun/install/cache,id=bun_deps \
-  bun install --frozen-lockfile
+COPY package.json package-lock.json* ./
+RUN --mount=type=cache,target=/root/.npm,id=npm_deps \
+  npm ci --legacy-peer-deps
 
 FROM base AS prod-deps
 WORKDIR /app
-COPY package.json bun.lock* ./
-RUN --mount=type=cache,target=/root/.bun/install/cache,id=bun_deps \
-  bun install --frozen-lockfile --production
+COPY package.json package-lock.json* ./
+RUN --mount=type=cache,target=/root/.npm,id=npm_deps \
+  npm ci --legacy-peer-deps --omit=dev
 
 FROM base AS builder
 WORKDIR /app
@@ -20,14 +20,13 @@ COPY . .
 ARG DATABASE_URL="postgresql://build:build@localhost:5432/build"
 ENV DATABASE_URL=${DATABASE_URL}
 ENV PUBLIC_SITE_URL="https://zigpkg.dev"
-RUN bun run prepare && bun run build
+RUN npm run prepare && npm run build
 
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production \
-  PORT=3200 \
-  BUN_RUNTIME_SECMGR_ENABLED=1
+  PORT=3200
 
 # tini + curl for healthcheck/signals
 RUN apk add --no-cache tini curl && \
@@ -46,4 +45,4 @@ USER app
 EXPOSE 3200
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "bun scripts/db-create.ts && bun run db:migrate && bun ./build/index.js"]
+CMD ["sh", "-c", "node scripts/db-create.ts && npm run db:migrate && node ./build/index.js"]
