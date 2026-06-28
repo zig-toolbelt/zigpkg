@@ -90,7 +90,7 @@
         type="button"
         onclick={copyFetch}
         title="Copy zig fetch command"
-        class="flex h-6.5 w-6.5 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition-colors hover:border-zig-400 hover:text-zig-700"
+        class="flex cursor-pointer h-6.5 w-6.5 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition-colors hover:border-zig-400 hover:text-zig-700"
       >
         {#if copied}
           <Check class="h-3.5 w-3.5 text-green-600" />
