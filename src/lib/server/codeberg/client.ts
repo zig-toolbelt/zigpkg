@@ -1,6 +1,6 @@
 import type { GitHubTag, GitHubContent } from '$lib/types/github';
 import { env } from '$env/dynamic/private';
-import type { ContentClient } from '$lib/server/content-client';
+import type { ContentClient, ReadmeSource } from '$lib/server/content-client';
 
 const CODEBERG_API_BASE = 'https://codeberg.org/api/v1';
 const REQUEST_TIMEOUT_MS = 8000;
@@ -90,16 +90,20 @@ export class CodebergClient implements ContentClient {
 		return response.text();
 	}
 
-	async getReadme(owner: string, repo: string): Promise<string | null> {
+	async getReadme(owner: string, repo: string): Promise<ReadmeSource | null> {
 		// Forgejo has no /readme endpoint: locate the README in the root listing,
-		// then fetch it raw.
+		// then fetch it raw. Return the filename alongside the content so the
+		// renderer can dispatch by extension.
 		const contents = await this.getContents(owner, repo);
 		if (!contents) return null;
 
 		const readme = contents.find((c) => c.type === 'file' && /^readme(\.|$)/i.test(c.name));
 		if (!readme) return null;
 
-		return this.getFileContent(owner, repo, readme.path);
+		const content = await this.getFileContent(owner, repo, readme.path);
+		if (content === null) return null;
+
+		return { filename: readme.name, content };
 	}
 }
 

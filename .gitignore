@@ -10,6 +10,7 @@ node_modules
 /build
 .zig-cache
 zig-out
+ideas
 
 # OS
 .DS_Store

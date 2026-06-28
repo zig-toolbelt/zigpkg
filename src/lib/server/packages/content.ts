@@ -1,23 +1,10 @@
-import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
-import { markedHighlight } from 'marked-highlight';
-import hljs from 'highlight.js';
-import hljsZig from 'highlightjs-zig';
-
-hljs.registerLanguage('zig', hljsZig);
-
-marked.use(markedHighlight({
-	langPrefix: 'hljs language-',
-	highlight(code, lang) {
-		const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-		return hljs.highlight(code, { language }).value;
-	}
-}));
 import { env } from '$env/dynamic/private';
 import { parseZonFile } from '$lib/server/packages/zon-parser';
 import { updatePackageContent } from '$lib/server/packages/queries';
 import type { ContentClient } from '$lib/server/content-client';
 import { rawUrl, blobUrl } from '$lib/providers';
+import { renderReadme } from '$lib/server/packages/readme-renderer';
 import type { getPackageByFullName } from './queries';
 
 type PackageWithContent = NonNullable<Awaited<ReturnType<typeof getPackageByFullName>>>;
@@ -68,10 +55,10 @@ async function fetchContent(pkg: PackageWithContent, client: ContentClient): Pro
 	]);
 
 	const SAFE_REPO_NAME = /^[a-zA-Z0-9._-]+$/;
-	const readmeRaw = readme.status === 'fulfilled' ? readme.value : null;
-	let readmeHtml = readmeRaw ? await marked(readmeRaw, { gfm: true }) : null;
+	const readmeSource = readme.status === 'fulfilled' ? readme.value : null;
+	let readmeHtml = readmeSource ? await renderReadme(readmeSource.filename, readmeSource.content) : null;
 	if (readmeHtml) {
-		readmeHtml = DOMPurify.sanitize(readmeHtml, { ADD_ATTR: ['align', 'media'] });
+		readmeHtml = DOMPurify.sanitize(readmeHtml, { ADD_ATTR: ['align', 'media', 'target', 'id'] });
 		if (SAFE_REPO_NAME.test(pkg.owner) && SAFE_REPO_NAME.test(pkg.name)) {
 			readmeHtml = rewriteRelativeUrls(readmeHtml, pkg.source, pkg.owner, pkg.name);
 		}
