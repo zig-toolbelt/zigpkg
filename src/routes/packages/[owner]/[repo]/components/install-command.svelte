@@ -43,7 +43,7 @@
       type="button"
       aria-label="Copy install command"
       onclick={copyInstall}
-      class="absolute right-1.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zig-400"
+      class="absolute right-1.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors cursor-pointer hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zig-400"
     >
       {#if copied}
         <Check class="w-4 h-4 text-green-400" />

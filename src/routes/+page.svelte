@@ -89,7 +89,7 @@
         </div>
         <button
           type="submit"
-          class="shrink-0 rounded-r-lg bg-zig-400 px-6 font-mono text-xs font-medium text-slate-900 transition-colors hover:bg-zig-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zig-500 focus-visible:ring-offset-2"
+          class="shrink-0 rounded-r-lg bg-zig-400 px-6 font-mono text-xs font-medium text-slate-900 transition-colors cursor-pointer hover:bg-zig-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zig-500 focus-visible:ring-offset-2"
         >
           Search
         </button>
