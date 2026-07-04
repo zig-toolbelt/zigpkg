@@ -6,6 +6,7 @@ import {
 	getRecentlyUpdated,
 	getTopTopics
 } from '$lib/server/packages/queries';
+import { NO_VERSION } from '$lib/utils/version';
 
 type Card = {
 	name: string;
@@ -16,6 +17,7 @@ type Card = {
 	stars: number;
 	packageType: string;
 	repositoryUrl: string;
+	pushedAt: string;
 };
 
 function toCard(pkg: {
@@ -27,16 +29,18 @@ function toCard(pkg: {
 	stars: number;
 	packageType: string;
 	repositoryUrl: string;
+	pushedAt: Date;
 }): Card {
 	return {
 		name: pkg.name,
 		fullName: pkg.fullName,
 		owner: pkg.owner ?? pkg.fullName.split('/')[0],
 		description: pkg.description ?? '',
-		version: pkg.version ?? 'latest',
+		version: pkg.version ?? NO_VERSION,
 		stars: pkg.stars,
 		packageType: pkg.packageType,
-		repositoryUrl: pkg.repositoryUrl
+		repositoryUrl: pkg.repositoryUrl,
+		pushedAt: pkg.pushedAt.toISOString()
 	};
 }
 

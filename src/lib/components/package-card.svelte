@@ -1,6 +1,8 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { formatNumber } from "$lib/utils/formatNumber";
+  import { formatRelativeDate } from "$lib/utils/formatRelativeDate";
+  import { hasVersion } from "$lib/utils/version";
   import { Star, ExternalLink, Copy, Check } from "lucide-svelte";
 
   type Props = {
@@ -12,10 +14,22 @@
     packageType: string;
     owner?: string;
     repositoryUrl?: string;
+    pushedAt: string;
   };
 
-  let { name, fullName, description, version, stars, packageType, owner, repositoryUrl }: Props =
-    $props();
+  let {
+    name,
+    fullName,
+    description,
+    version,
+    stars,
+    packageType,
+    owner,
+    repositoryUrl,
+    pushedAt,
+  }: Props = $props();
+
+  const updatedLabel = $derived(formatRelativeDate(pushedAt).label);
 
   const ownerName = $derived(owner ?? fullName.split("/")[0]);
   const repo = $derived(name ?? fullName.split("/").slice(1).join("/") ?? fullName);
@@ -24,10 +38,9 @@
   let copied = $state(false);
 
   async function copyFetch() {
-    const cmd =
-      version && version !== "latest"
-        ? `zig fetch --save git+${repoHref}#${version}`
-        : `zig fetch --save git+${repoHref}`;
+    const cmd = hasVersion(version)
+      ? `zig fetch --save git+${repoHref}#${version}`
+      : `zig fetch --save git+${repoHref}`;
     await navigator.clipboard.writeText(cmd);
     copied = true;
     setTimeout(() => (copied = false), 2000);
@@ -62,7 +75,7 @@
       {repo}
     </a>
     <span class="shrink-0 rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-500">
-      {version}
+      {hasVersion(version) ? version : `Updated ${updatedLabel}`}
     </span>
   </div>
 

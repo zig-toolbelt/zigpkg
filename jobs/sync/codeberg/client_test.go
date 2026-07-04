@@ -208,8 +208,8 @@ func TestLatestTag(t *testing.T) {
 		if !strings.HasSuffix(r.URL.Path, "/repos/carol/ziglib/tags") {
 			t.Errorf("path: got %q", r.URL.Path)
 		}
-		if got := r.URL.Query().Get("limit"); got != "1" {
-			t.Errorf("limit: got %q, want 1", got)
+		if got := r.URL.Query().Get("limit"); got != "30" {
+			t.Errorf("limit: got %q, want 30", got)
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`[{"name":"v1.2.3"},{"name":"v1.2.2"}]`))
@@ -221,6 +221,46 @@ func TestLatestTag(t *testing.T) {
 	}
 	if tag != "v1.2.3" {
 		t.Errorf("LatestTag: got %q, want v1.2.3", tag)
+	}
+}
+
+// TestLatestTagIgnoresNonSemverTags covers the sokol-zig report: a repo whose
+// most recently created tag is a manual, non-version marker must not surface
+// that marker as the version — the highest semver-shaped tag wins instead.
+func TestLatestTagIgnoresNonSemverTags(t *testing.T) {
+	t.Parallel()
+
+	src := newTestSource(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`[{"name":"bindings-cleanup"},{"name":"v0.5.0"}]`))
+	})
+
+	tag, err := src.LatestTag(context.Background(), "carol", "ziglib")
+	if err != nil {
+		t.Fatalf("LatestTag: %v", err)
+	}
+	if tag != "v0.5.0" {
+		t.Errorf("LatestTag: got %q, want v0.5.0", tag)
+	}
+}
+
+// TestLatestTagAllNonSemver covers a repo with tags but none shaped like a
+// version (e.g. sokol-zig, which only has the "bindings-cleanup" marker) —
+// LatestTag must report no version rather than the marker tag.
+func TestLatestTagAllNonSemver(t *testing.T) {
+	t.Parallel()
+
+	src := newTestSource(t, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`[{"name":"bindings-cleanup"}]`))
+	})
+
+	tag, err := src.LatestTag(context.Background(), "carol", "ziglib")
+	if err != nil {
+		t.Fatalf("LatestTag: %v", err)
+	}
+	if tag != "" {
+		t.Errorf("LatestTag should be empty for non-semver-only tags, got %q", tag)
 	}
 }
 

@@ -1,32 +1,16 @@
 <script lang="ts">
-  import { BookOpen, Code2, Compass, PackagePlus, Rocket, ShieldCheck } from "lucide-svelte";
+  import type { ComponentType } from "svelte";
+  import type { PageProps } from "./$types";
+  import { BookOpen, CheckCircle2, Code2, Compass, ShieldCheck, Terminal } from "lucide-svelte";
 
-  const guides = [
-    {
-      title: "Getting started",
-      description: "Install Zig, search the registry, and add your first package to a project.",
-      href: "/docs/getting-started",
-      icon: Rocket,
-    },
-    {
-      title: "Package metadata",
-      description: "Understand versions, repository activity, licenses, topics, and Zig compatibility.",
-      href: "/docs/package-metadata",
-      icon: BookOpen,
-    },
-    {
-      title: "Publishing checklist",
-      description: "Prepare a repository so it can be discovered, indexed, and trusted by Zig users.",
-      href: "/docs/publishing-checklist",
-      icon: PackagePlus,
-    },
-    {
-      title: "Build integration",
-      description: "Wire package dependencies into your build.zig.zon and keep updates predictable.",
-      href: "/docs/build-integration",
-      icon: Code2,
-    },
-  ];
+  let { data }: PageProps = $props();
+
+  const iconMap: Record<string, ComponentType> = {
+    terminal: Terminal,
+    "book-open": BookOpen,
+    "check-circle-2": CheckCircle2,
+    "code-2": Code2,
+  };
 
   const steps = [
     "Search for a package by name, topic, or repository owner.",
@@ -92,27 +76,23 @@
         On this page
       </p>
       <nav class="mt-3 space-y-1 text-sm">
-        <a href="/docs/getting-started" class="block rounded-md bg-zig-100 px-3 py-2 font-medium text-zig-700">
-          Getting started
-        </a>
-        <a href="/docs/package-metadata" class="block rounded-md px-3 py-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
-          Package metadata
-        </a>
-        <a href="/docs/publishing-checklist" class="block rounded-md px-3 py-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
-          Publishing checklist
-        </a>
-        <a href="/docs/build-integration" class="block rounded-md px-3 py-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900">
-          Build integration
-        </a>
+        {#each data.docs as doc (doc.slug)}
+          <a
+            href={`/docs/${doc.slug}`}
+            class="block rounded-md px-3 py-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
+            {doc.title}
+          </a>
+        {/each}
       </nav>
     </aside>
 
     <div class="space-y-8">
       <section class="grid gap-3 sm:grid-cols-2">
-        {#each guides as guide (guide.title)}
-          {@const Icon = guide.icon}
+        {#each data.docs as doc (doc.slug)}
+          {@const Icon = iconMap[doc.icon] ?? BookOpen}
           <a
-            href={guide.href}
+            href={`/docs/${doc.slug}`}
             class="group rounded-lg border border-slate-200 bg-white p-5 transition-colors hover:border-zig-300 hover:bg-zig-50/40"
           >
             <div
@@ -121,9 +101,9 @@
               <Icon class="h-4 w-4" />
             </div>
             <h2 class="text-lg font-bold tracking-tight text-slate-900 transition-colors group-hover:text-zig-800">
-              {guide.title}
+              {doc.title}
             </h2>
-            <p class="mt-2 text-sm leading-6 text-slate-500">{guide.description}</p>
+            <p class="mt-2 text-sm leading-6 text-slate-500">{doc.description}</p>
           </a>
         {/each}
       </section>

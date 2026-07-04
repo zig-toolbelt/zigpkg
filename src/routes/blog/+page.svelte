@@ -13,6 +13,15 @@
 
   const posts = [
     {
+      title: "Correct package versions, safer install commands",
+      excerpt:
+        "Fixed a bug where packages with no real releases (like sokol-zig) showed a random git tag as their \"current version.\" Versions now come from build.zig.zon and semver-shaped tags only, install commands never pin to a stale ref, and the semver logic moved onto well-tested libraries instead of hand-rolled parsing.",
+      category: "Updates",
+      date: "Jul 4, 2026",
+      readTime: "2 min read",
+      href: "/blog/version-fix-jul-4-2026",
+    },
+    {
       title: "Favicon, license detection, and a few first-week fixes",
       excerpt:
         "A branded ZIG favicon, smarter license display, version and last-sync badges in the header, and a shared Badge component to stop repeating pill styles across the codebase.",

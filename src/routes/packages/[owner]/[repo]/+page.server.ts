@@ -7,6 +7,7 @@ import {
 import { getContentClient } from '$lib/server/content-client';
 import { getPackageContent } from '$lib/server/packages/content';
 import { ownerUrl } from '$lib/providers';
+import { resolveDisplayVersion, resolveInstallRef } from '$lib/utils/version';
 
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const fullName = `${params.owner}/${params.repo}`;
@@ -42,6 +43,18 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 
 	const topics = pkg.topics ?? [];
 
+	// installRef is what `zig fetch --save git+URL#ref` pins to — resolveInstallRef
+	// guarantees it's either a real, existing tag or NO_VERSION (fetch HEAD),
+	// never the manifest's declared .version (which may not have a matching
+	// tag at all). displayVersion is purely informational and prefers the
+	// manifest, matching what a `zig fetch` of HEAD would actually pull in.
+	const installRef = resolveInstallRef({ tags: tagList, fallbackVersion: pkg.version });
+	const displayVersion = resolveDisplayVersion({
+		zonVersion: zonInfo?.version ?? null,
+		tags: tagList,
+		fallbackVersion: pkg.version
+	});
+
 	const LICENSE_NAMES = new Set(['LICENSE', 'LICENSE.MD', 'LICENSE.TXT', 'LICENSE.RST', 'LICENCE', 'COPYING']);
 	const licenseFile = fileList.find((f) => LICENSE_NAMES.has(f.name.toUpperCase()));
 	const licenseFileUrl = licenseFile?.htmlUrl ?? null;
@@ -61,7 +74,8 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 			ownerAvatarUrl: pkg.ownerAvatarUrl,
 			ownerHtmlUrl: pkg.ownerHtmlUrl || ownerUrl(pkg.source, pkg.owner),
 			description: pkg.description || '',
-			version: pkg.version || 'latest',
+			installRef,
+			displayVersion,
 			stars: pkg.stars,
 			forks: pkg.forks,
 			openIssues: pkg.openIssues,

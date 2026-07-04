@@ -7,6 +7,8 @@
 // is not stored (see the package schema note). Pass an explicit branch when one
 // is known.
 
+import { hasVersion } from '$lib/utils/version';
+
 export type PackageSource = 'github' | 'codeberg';
 
 const HOSTS: Record<PackageSource, string> = {
@@ -44,11 +46,10 @@ export function archiveFetchUrl(
 ): string {
 	const base = repositoryUrl.replace(/\/+$/, '');
 	if (isCodeberg(source)) {
-		const ref = version === 'latest' ? branch : version;
+		const ref = hasVersion(version) ? version : branch;
 		return `${base}/archive/${ref}.tar.gz`;
 	}
-	const path =
-		version === 'latest' ? 'archive/HEAD.tar.gz' : `archive/refs/tags/${version}.tar.gz`;
+	const path = hasVersion(version) ? `archive/refs/tags/${version}.tar.gz` : 'archive/HEAD.tar.gz';
 	return `${base}/${path}`;
 }
 

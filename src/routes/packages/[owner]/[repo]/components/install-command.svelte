@@ -1,12 +1,14 @@
 <script lang="ts">
   import { Check, Copy } from "lucide-svelte";
-  let { repositoryUrl, version }: { repositoryUrl: string; version: string } =
+  import { hasVersion } from "$lib/utils/version";
+
+  let { repositoryUrl, installRef }: { repositoryUrl: string; installRef: string } =
     $props();
 
   let copied = $state(false);
 
   const installCommand = $derived(
-    `zig fetch --save git+${repositoryUrl}${version !== "latest" ? "#" + version : ""}`,
+    `zig fetch --save git+${repositoryUrl}${hasVersion(installRef) ? "#" + installRef : ""}`,
   );
 
   async function copyInstall() {

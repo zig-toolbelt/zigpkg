@@ -7,6 +7,7 @@ import {
 	getOwnerCanonical
 } from '$lib/server/packages/queries';
 import { ownerUrl } from '$lib/providers';
+import { NO_VERSION } from '$lib/utils/version';
 
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const { owner } = params;
@@ -44,7 +45,7 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 			source: pkg.source,
 			owner: pkg.owner,
 			description: pkg.description || '',
-			version: pkg.version || 'latest',
+			version: pkg.version || NO_VERSION,
 			packageType: pkg.packageType,
 			stars: pkg.stars,
 			openIssues: pkg.openIssues,

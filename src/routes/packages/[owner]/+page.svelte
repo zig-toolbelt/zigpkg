@@ -2,6 +2,7 @@
   import { resolve } from "$app/paths";
   import { formatNumber } from "$lib/utils/formatNumber";
   import { formatDate } from "$lib/utils/formatDate";
+  import { formatRelativeDate } from "$lib/utils/formatRelativeDate";
   import {
     Star,
     CircleAlert,
@@ -12,6 +13,7 @@
     ExternalLink,
   } from "lucide-svelte";
   import { archiveFetchUrl } from "$lib/providers";
+  import { hasVersion } from "$lib/utils/version";
 
   let { data } = $props();
 
@@ -144,7 +146,9 @@
             <span
               class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-500"
             >
-              {pkg.version}
+              {hasVersion(pkg.version)
+                ? pkg.version
+                : `Updated ${formatRelativeDate(pkg.pushedAt).label}`}
             </span>
             <button
               onclick={() => copyFetchCommand(pkg)}

@@ -1,10 +1,85 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
-  import { ArrowRight, CalendarDays, ChevronLeft, Clock3, Tag } from "lucide-svelte";
+  import { ArrowRight, CalendarDays, ChevronLeft, Clock3, Tag, CircleAlert, CircleCheck } from "lucide-svelte";
 
   let { params }: PageProps = $props();
 
-  const posts = [
+  type InlinePart = { text: string; strong?: boolean; code?: boolean };
+
+  // Minimal inline markup for post copy: **bold** and `code`. Every piece of
+  // text still goes through Svelte's normal (escaped) interpolation in the
+  // template below — no {@html}, so there's no injection surface at all.
+  function parseInline(text: string): InlinePart[] {
+    const parts: InlinePart[] = [];
+    const pattern = /\*\*(.+?)\*\*|`(.+?)`/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(text))) {
+      if (match.index > lastIndex) parts.push({ text: text.slice(lastIndex, match.index) });
+      if (match[1] !== undefined) parts.push({ text: match[1], strong: true });
+      else parts.push({ text: match[2], code: true });
+      lastIndex = pattern.lastIndex;
+    }
+    if (lastIndex < text.length) parts.push({ text: text.slice(lastIndex) });
+    return parts;
+  }
+
+  type Section = { title: string; body?: string; bullets?: string[] };
+  type Callout = { before: { label: string; value: string }; after: { label: string; value: string } };
+  type Post = {
+    slug: string;
+    title: string;
+    excerpt: string;
+    category: string;
+    date: string;
+    readTime: string;
+    author: string;
+    callout?: Callout;
+    sections: Section[];
+    links?: { label: string; url: string }[];
+  };
+
+  const posts: Post[] = [
+    {
+      slug: "version-fix-jul-4-2026",
+      title: "Correct package versions, safer install commands",
+      excerpt:
+        "Fixed a bug where packages with no real releases (like sokol-zig) showed a random git tag as their \"current version.\" Versions now come from build.zig.zon and semver-shaped tags only, install commands never pin to a stale ref, and the semver logic moved onto well-tested libraries instead of hand-rolled parsing.",
+      category: "Updates",
+      date: "Jul 4, 2026",
+      readTime: "2 min read",
+      author: "zigpkg team",
+      callout: {
+        before: { label: "Before", value: "bindings-cleanup" },
+        after: { label: "After", value: "Updated 3 days ago" },
+      },
+      sections: [
+        {
+          title: "The bug: a git tag isn't always a version",
+          body:
+            "A maintainer pointed out that sokol-zig showed `bindings-cleanup` as its current version. That's not a release — it's a marker tag created ages ago to flag a breaking change, on a repo that doesn't use tags for versioning at all. The registry was picking **whichever tag was created most recently** and showing it verbatim, with no check that it actually looked like a version. Any repo with a stray non-version tag newer than its last real release hit the same bug — and the generated `zig fetch` install command inherited the same garbage tag as its pinned ref.",
+        },
+        {
+          title: "How it's fixed",
+          body: "Version display now follows a strict priority, then stops trusting the manifest alone for anything that ends up in a command you'll run:",
+          bullets: [
+            "**Priority order**: the version declared in `build.zig.zon`, then the highest semver-shaped git tag (`v1.2.3`, `1.2.3-rc.1`, and similar) — anything else is ignored.",
+            "**No resolvable version?** The page shows `Updated N days ago` instead, matching how other Zig registries handle untagged repos.",
+            "**Install commands are safer**: the pinned ref only ever comes from a real, existing tag, never from the manifest's declared version on its own — so a stale or non-existent ref can never end up in a copy-pasted `zig fetch` command.",
+          ],
+        },
+        {
+          title: "Under the hood",
+          body: "The version-comparison logic used to be hand-rolled on both sides. Not anymore:",
+          bullets: [
+            "The sync worker now delegates to `golang.org/x/mod/semver`, the frontend to the `semver` npm package — both well-tested, spec-correct, and no longer our custom regex to maintain.",
+            "That fixed a subtle bug **for free**: prerelease tags like `rc.9` and `rc.10` used to compare as plain strings and sort in the wrong order.",
+            "The worker's tag scan is now a named, documented, bounded window — not a couple of unexplained magic numbers.",
+          ],
+        },
+      ],
+      links: undefined,
+    },
     {
       slug: "introducing-zigpkg",
       title: "Introducing zigpkg.dev",
@@ -18,17 +93,23 @@
         {
           title: "Why we built it",
           body:
-            "The company we work at uses Zig heavily in internal development. Finding packages meant spelunking through GitHub and Codeberg topic searches, which got old fast — we just wanted one place to discover things. Before writing our own we looked at zigistry.dev, aquila.red, zig.pm, and astrolabe.pm — most are either unmaintained or missing the features we needed, so we built zigpkg.dev.",
+            "The company we work at uses Zig heavily in internal development. Finding packages meant spelunking through GitHub and Codeberg topic searches, which got old fast — we just wanted **one place to discover things**. Before writing our own we looked at zigistry.dev, aquila.red, zig.pm, and astrolabe.pm — most are either unmaintained or missing the features we needed, so we built zigpkg.dev.",
         },
         {
           title: "What it does",
-          body:
-            "Browse and search libraries and applications. Filter by topic, owner, type, or A–Z. Every package page renders the README with proper Zig syntax highlighting, shows stars / forks / license / version, the file tree, and version history. It also parses each repo's build.zig.zon and lists the package's dependencies — so you can see what a package pulls in before you add it. The registry indexes both GitHub and Codeberg, so packages hosted on a Forgejo instance won't be invisible. Want your package listed? Tag the repo zig-package or zig-library (libraries) / zig-program (applications) and it gets picked up automatically on the next hourly sync.",
+          body: "One registry, both hosts, no submission form to fill out:",
+          bullets: [
+            "**Browse and search** libraries and applications, filterable by topic, owner, type, or A–Z.",
+            "Every package page renders the **README** with proper Zig syntax highlighting, plus stars / forks / license / version, the file tree, and version history.",
+            "Parses each repo's `build.zig.zon` and lists its **dependencies** — see what a package pulls in before you add it.",
+            "Indexes both **GitHub and Codeberg**, so packages hosted on a Forgejo instance won't be invisible.",
+            "Tag your repo `zig-package` / `zig-library` (libraries) or `zig-program` (applications) and it's **picked up automatically** on the next hourly sync.",
+          ],
         },
         {
           title: "What's next",
           body:
-            "This isn't a weekend throwaway — we use it internally, so it's going to stick around and keep getting maintained. The codebase is MIT-licensed and open source, and we'd love contributors: feature ideas, bug reports, pull requests, or just telling us what annoys you. Join the discussion:",
+            "This isn't a weekend throwaway — we use it internally, so it's going to stick around and keep getting maintained. The codebase is **MIT-licensed and open source**, and we'd love contributors: feature ideas, bug reports, pull requests, or just telling us what annoys you. Join the discussion:",
         },
       ],
       links: [
@@ -51,26 +132,43 @@
       date: "Jun 25, 2026",
       readTime: "3 min read",
       author: "zigpkg team",
+      callout: {
+        before: { label: "Before", value: "License: Unknown" },
+        after: { label: "After", value: "Unknown → LICENSE file" },
+      },
       sections: [
         {
           title: "Custom favicon",
           body:
-            "The browser tab was showing the default SvelteKit Svelte logo — the orange flame. Not exactly on-brand. It's now replaced with a ZIG badge: the same gold rounded square you see in the header.",
+            "The browser tab was showing the default SvelteKit flame — not exactly on-brand. It's now a **ZIG badge**, the same gold rounded square you see in the header.",
         },
         {
           title: "Smarter license display",
           body:
-            "Codeberg's API doesn't expose license information, so all Codeberg packages showed \"Unknown\". Same for GitHub repos without a configured SPDX identifier. Now, when the license field is empty, the package page checks whether a LICENSE, LICENSE.md, LICENCE, or COPYING file exists in the repo root — if it does, \"Unknown\" becomes a clickable link to that file. No extra API calls: the file tree is already fetched for every package page.",
+            "Codeberg's API doesn't expose license info, and neither does GitHub for repos without a configured SPDX identifier — both used to show a dead-end \"Unknown\". Now, when the license field is empty:",
+          bullets: [
+            "The package page checks whether a `LICENSE`, `LICENSE.md`, `LICENCE`, or `COPYING` file exists in the repo root.",
+            "If one does, **\"Unknown\" becomes a clickable link** straight to that file — no extra API calls, the file tree is already fetched for every package page.",
+          ],
         },
         {
           title: "Version and sync badges in the header",
-          body:
-            "The header now shows two small pills on wide screens: the current app version (read from package.json at build time) and the timestamp of the last successful package sync (queried live from the database). The sync time updates on every page load, so it reflects the actual state of the index — not a stale build date.",
+          body: "Two small pills now show on wide screens:",
+          bullets: [
+            "The **current app version**, read from `package.json` at build time.",
+            "The **last successful sync**, queried live from the database and updated on every page load — so it reflects the actual state of the index, not a stale build date.",
+          ],
         },
         {
           title: "Shared Badge component",
           body:
-            "Pill badge styles were scattered across a handful of components with copy-pasted Tailwind classes. They're now consolidated into a single Badge component with named variants — zig (header meta badges), topic (clickable keyword pills), subtle (version labels), and muted (tab counters). Less drift, easier to restyle globally.",
+            "Pill badge styles were scattered across a handful of components with copy-pasted Tailwind classes. Now there's one `Badge` component with four named variants:",
+          bullets: [
+            "`zig` — header meta badges",
+            "`topic` — clickable keyword pills",
+            "`subtle` — version labels",
+            "`muted` — tab counters",
+          ],
         },
       ],
       links: undefined,
@@ -126,9 +224,47 @@
     <article
       class="prose prose-slate max-w-none rounded-lg border border-slate-200 bg-white p-6 sm:p-8 prose-headings:font-bold prose-a:text-zig-600 prose-a:no-underline hover:prose-a:underline"
     >
+      {#if post.callout}
+        <div class="not-prose mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+            <CircleAlert class="h-5 w-5 shrink-0 text-red-500" />
+            <div class="min-w-0">
+              <p class="font-mono text-[10px] font-bold uppercase tracking-wide text-red-600/70">
+                {post.callout.before.label}
+              </p>
+              <p class="truncate font-mono text-sm font-bold text-red-800">
+                {post.callout.before.value}
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+            <CircleCheck class="h-5 w-5 shrink-0 text-emerald-500" />
+            <div class="min-w-0">
+              <p class="font-mono text-[10px] font-bold uppercase tracking-wide text-emerald-600/70">
+                {post.callout.after.label}
+              </p>
+              <p class="truncate font-mono text-sm font-bold text-emerald-800">
+                {post.callout.after.value}
+              </p>
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      {#snippet inline(text: string)}
+        {#each parseInline(text) as part, i (i)}
+          {#if part.strong}<strong>{part.text}</strong>{:else if part.code}<code>{part.text}</code>{:else}{part.text}{/if}
+        {/each}
+      {/snippet}
+
       {#each post.sections as section (section.title)}
         <h2>{section.title}</h2>
-        <p>{section.body}</p>
+        {#if section.body}<p>{@render inline(section.body)}</p>{/if}
+        {#if section.bullets}
+          <ul>
+            {#each section.bullets as bullet (bullet)}<li>{@render inline(bullet)}</li>{/each}
+          </ul>
+        {/if}
       {/each}
 
       {#if post.links}

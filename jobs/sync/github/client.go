@@ -9,7 +9,17 @@ import (
 	"net/http"
 )
 
-const repoFields = `
+// maxTagsScanned bounds how many of a repo's most recently created tags
+// GitHub returns per query. Only tags within this window are considered when
+// picking the highest semver tag (see semver.Highest) — if a repo has more
+// tags than this and its true highest version falls outside the window, it
+// will be missed. This is an accepted cost/exhaustiveness trade-off, not a
+// bug: a wider window increases this query's GraphQL point cost (lowering
+// sync throughput under GitHub's rate limit), and the vast majority of Zig
+// packages have far fewer than this many tags.
+const maxTagsScanned = 30
+
+var repoFields = fmt.Sprintf(`
     databaseId
     name
     nameWithOwner
@@ -25,17 +35,17 @@ const repoFields = `
     createdAt
     updatedAt
     pushedAt
-    refs(refPrefix: "refs/tags/", orderBy: {field: TAG_COMMIT_DATE, direction: DESC}, first: 1) {
+    refs(refPrefix: "refs/tags/", orderBy: {field: TAG_COMMIT_DATE, direction: DESC}, first: %d) {
       nodes { name }
     }
-`
+`, maxTagsScanned)
 
-const repoQuery = `query($owner: String!, $name: String!) {
+var repoQuery = `query($owner: String!, $name: String!) {
   rateLimit { limit cost remaining resetAt }
   repository(owner: $owner, name: $name) {` + repoFields + `}
 }`
 
-const searchQuery = `query($query: String!, $after: String) {
+var searchQuery = `query($query: String!, $after: String) {
   rateLimit { limit cost remaining resetAt }
   search(query: $query, type: REPOSITORY, first: 25, after: $after) {
     repositoryCount

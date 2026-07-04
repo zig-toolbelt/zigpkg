@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { getPackages, getFilteredPackageCount } from '$lib/server/packages/queries';
+import { NO_VERSION } from '$lib/utils/version';
 
 const PAGE_SIZE = 20;
 
@@ -21,11 +22,12 @@ export const load: PageServerLoad = async ({ url }) => {
 			fullName: pkg.fullName,
 			owner: pkg.owner,
 			description: pkg.description ?? '',
-			version: pkg.version ?? 'latest',
+			version: pkg.version ?? NO_VERSION,
 			stars: pkg.stars,
 			forks: pkg.forks,
 			packageType: pkg.packageType,
-			repositoryUrl: pkg.repositoryUrl
+			repositoryUrl: pkg.repositoryUrl,
+			pushedAt: pkg.pushedAt.toISOString()
 		})),
 		totalCount,
 		page,

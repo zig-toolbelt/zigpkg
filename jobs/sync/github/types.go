@@ -1,6 +1,10 @@
 package github
 
-import "time"
+import (
+	"time"
+
+	"zigpkg.dev/sync/semver"
+)
 
 // GraphQL response structures
 
@@ -84,12 +88,14 @@ func (r *Repo) Topics() []string {
 	return names
 }
 
-// LatestTag returns the latest git tag name, or empty string if none.
+// LatestTag returns the highest semver-shaped git tag name, or "" if the repo
+// has no tag shaped like a version (e.g. only non-version marker tags).
 func (r *Repo) LatestTag() string {
-	if len(r.Refs.Nodes) > 0 {
-		return r.Refs.Nodes[0].Name
+	names := make([]string, len(r.Refs.Nodes))
+	for i, n := range r.Refs.Nodes {
+		names[i] = n.Name
 	}
-	return ""
+	return semver.Highest(names)
 }
 
 // License returns the SPDX ID string pointer, or nil.

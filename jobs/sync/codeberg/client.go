@@ -19,6 +19,7 @@ import (
 	"golang.org/x/time/rate"
 
 	"zigpkg.dev/sync/httpx"
+	"zigpkg.dev/sync/semver"
 	"zigpkg.dev/sync/source"
 )
 
@@ -35,6 +36,17 @@ const (
 	// with a small burst keeps the crawler a good neighbour.
 	codebergRPS   = rate.Limit(5)
 	codebergBurst = 5
+
+	// maxTagsScanned bounds how many of a repo's tags LatestTag fetches (the
+	// endpoint has no "most recent" ordering guarantee, so this is simply the
+	// first page). Only tags within this window are considered when picking
+	// the highest semver tag (see semver.Highest) — if a repo has more tags
+	// than this and its true highest version falls outside the window, it
+	// will be missed. Accepted cost/exhaustiveness trade-off, not a bug: a
+	// wider window means a larger response body per repo needing tag
+	// resolution, and the vast majority of Zig packages have far fewer than
+	// this many tags.
+	maxTagsScanned = 30
 )
 
 // Source is a Codeberg-backed source.Source. It is not safe for concurrent use;
@@ -130,19 +142,21 @@ func (s *Source) GetRepo(ctx context.Context, owner, name string) (*source.Repo,
 	return &repo, nil
 }
 
-// LatestTag returns the most recent tag name for a repo, or "" if it has none.
-// It implements source.TagFetcher: the sync loop calls it only for repos that
-// pass the incremental cutoff, so the extra request is never wasted on repos
-// that are about to be skipped.
+// LatestTag returns the highest semver-shaped tag name for a repo, or "" if
+// it has no tag shaped like a version. It implements source.TagFetcher: the
+// sync loop calls it only for repos that pass the incremental cutoff, so the
+// extra request is never wasted on repos that are about to be skipped.
 func (s *Source) LatestTag(ctx context.Context, owner, name string) (string, error) {
 	var tags []apiTag
-	if _, err := s.do(ctx, "/repos/"+owner+"/"+name+"/tags?limit=1", &tags); err != nil {
+	path := fmt.Sprintf("/repos/%s/%s/tags?limit=%d", owner, name, maxTagsScanned)
+	if _, err := s.do(ctx, path, &tags); err != nil {
 		return "", err
 	}
-	if len(tags) == 0 {
-		return "", nil
+	names := make([]string, len(tags))
+	for i, t := range tags {
+		names[i] = t.Name
 	}
-	return tags[0].Name, nil
+	return semver.Highest(names), nil
 }
 
 // toRepo maps a Forgejo repo onto the neutral model. Forgejo has no separate

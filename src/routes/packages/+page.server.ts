@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 import { getPackages, getFilteredPackageCount, getTopTopics } from '$lib/server/packages/queries';
 import type { SortOption } from '$lib/server/packages/queries';
 import type { PackageType } from '$lib/types/package';
+import { NO_VERSION } from '$lib/utils/version';
 
 const PAGE_SIZE = 30;
 
@@ -36,12 +37,12 @@ export const load: PageServerLoad = async ({ url, setHeaders }) => {
 			fullName: pkg.fullName,
 			owner: pkg.owner,
 			description: pkg.description ?? '',
-			version: pkg.version ?? 'latest',
+			version: pkg.version ?? NO_VERSION,
 			stars: pkg.stars,
 			forks: pkg.forks,
 			packageType: pkg.packageType,
 			repositoryUrl: pkg.repositoryUrl,
-			updatedAt: pkg.pushedAt.toISOString()
+			pushedAt: pkg.pushedAt.toISOString()
 		})),
 		totalCount,
 		topics,

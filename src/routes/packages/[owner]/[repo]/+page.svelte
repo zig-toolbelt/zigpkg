@@ -181,10 +181,10 @@
         <dl class="overflow-hidden rounded-lg border border-slate-200 bg-slate-200">
           <div class="bg-zig-50/60 p-3">
             <dt class="font-mono text-[10px] uppercase tracking-wide text-zig-700/60">
-              Current version
+              {pkg.displayVersion ? "Current version" : "Version"}
             </dt>
             <dd class="mt-1 truncate font-mono text-base font-bold text-zig-800">
-              {pkg.version}
+              {pkg.displayVersion ?? "No tagged releases"}
             </dd>
           </div>
           <div class="grid grid-cols-2 gap-px">
@@ -282,7 +282,7 @@
   <div class="flex flex-col lg:flex-row gap-8">
     <div class="flex-1 min-w-0 space-y-5">
       <div id="install">
-        <InstallCommand repositoryUrl={pkg.repositoryUrl} version={pkg.version} />
+        <InstallCommand repositoryUrl={pkg.repositoryUrl} installRef={pkg.installRef} />
       </div>
       <div class="flex-1 min-w-0">
         {#if activeTab === "readme"}
