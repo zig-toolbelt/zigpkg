@@ -115,7 +115,7 @@
 
   <!-- Packages Grid -->
   <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-    {#each data.packages as pkg (pkg.fullName)}
+    {#each data.packages as pkg (pkg.id)}
       <div
         class="group flex flex-col rounded-lg border border-slate-200 bg-white p-5 transition-all hover:border-zig-300 hover:shadow-[0_4px_14px_rgb(15_23_42_/_0.06)]"
       >

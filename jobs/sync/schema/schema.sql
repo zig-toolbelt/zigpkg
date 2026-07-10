@@ -1,5 +1,10 @@
+-- id is text (uuid), not serial: the SvelteKit app's Auth.js integration
+-- requires a string user id (see panel/src/lib/server/db/schema.ts), and this
+-- job upserts into the same table. name/email/email_verified/image are
+-- Auth.js-only columns this job never reads or writes; omitted here since
+-- sqlc only needs to type-check the queries this job actually issues.
 CREATE TABLE users (
-  id serial PRIMARY KEY,
+  id text PRIMARY KEY DEFAULT gen_random_uuid()::text,
   source varchar(20) NOT NULL DEFAULT 'github',
   source_id bigint NOT NULL,
   username varchar(255) NOT NULL,
@@ -18,7 +23,7 @@ CREATE TABLE packages (
   source_id bigint NOT NULL,
   name varchar(255) NOT NULL,
   full_name varchar(512) NOT NULL,
-  owner_id integer NOT NULL REFERENCES users(id),
+  owner_id text NOT NULL REFERENCES users(id),
   description text,
   version varchar(50) DEFAULT 'latest',
   stars integer NOT NULL DEFAULT 0,

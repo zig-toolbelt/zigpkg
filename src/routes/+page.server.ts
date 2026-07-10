@@ -9,6 +9,7 @@ import {
 import { NO_VERSION } from '$lib/utils/version';
 
 type Card = {
+	id: number;
 	name: string;
 	fullName: string;
 	owner: string;
@@ -21,6 +22,7 @@ type Card = {
 };
 
 function toCard(pkg: {
+	id: number;
 	name: string;
 	fullName: string;
 	owner: string | null;
@@ -32,6 +34,7 @@ function toCard(pkg: {
 	pushedAt: Date;
 }): Card {
 	return {
+		id: pkg.id,
 		name: pkg.name,
 		fullName: pkg.fullName,
 		owner: pkg.owner ?? pkg.fullName.split('/')[0],

@@ -3,6 +3,7 @@
   import { formatNumber } from '$lib/utils/formatNumber';
   import PackageCard from '$lib/components/package-card.svelte';
   import PackageLine from '$lib/components/package-line.svelte';
+  import Badge from '$lib/components/ui/badge.svelte';
   import { Search, Package, Star, Library, AppWindow } from 'lucide-svelte';
   import { siteUrl } from '$lib/seo';
 
@@ -63,6 +64,11 @@
       <div class="mb-3 font-mono text-[11px] font-semibold uppercase tracking-wide text-zig-700">
         Zig package discovery
       </div>
+      {#if data.lastSyncedAtExact}
+        <div class="mb-4 flex justify-center">
+          <Badge variant="zig">synced: {data.lastSyncedAtExact}</Badge>
+        </div>
+      {/if}
       <h1 class="text-4xl font-black leading-[1.05] tracking-tight text-slate-950 sm:text-6xl">
         Find your next Zig package
       </h1>
@@ -185,7 +191,7 @@
       {#each sections as section (section.title)}
         <div>
           <h3 class="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">{section.title}</h3>
-          {#each section.items.slice(0, 6) as pkg (pkg.fullName)}
+          {#each section.items.slice(0, 6) as pkg (pkg.id)}
             <PackageLine {...pkg} />
           {/each}
         </div>
@@ -200,7 +206,7 @@
       </a>
     </div>
     <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {#each data.popular as pkg (pkg.fullName)}
+      {#each data.popular as pkg (pkg.id)}
         <PackageCard {...pkg} />
       {/each}
     </div>

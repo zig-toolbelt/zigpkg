@@ -14,7 +14,7 @@ type Package struct {
 	SourceID      int64
 	Name          string
 	FullName      string
-	OwnerID       int32
+	OwnerID       string
 	Description   pgtype.Text
 	Version       pgtype.Text
 	Stars         int32
@@ -52,7 +52,7 @@ type SyncMetadatum struct {
 }
 
 type User struct {
-	ID        int32
+	ID        string
 	Source    string
 	SourceID  int64
 	Username  string

@@ -41,6 +41,47 @@
 
   const posts: Post[] = [
     {
+      slug: "github-signin-jul-5-2026",
+      title: "Sign in with GitHub, and a calmer header",
+      excerpt:
+        "You can now sign in with GitHub — no email or password to set up. We also used the opportunity to clean up the header: a live star count, version and sync status moved out of your way, and a sync indicator that only speaks up when something's actually wrong.",
+      category: "Updates",
+      date: "Jul 5, 2026",
+      readTime: "2 min read",
+      author: "zigpkg team",
+      sections: [
+        {
+          title: "Sign in with GitHub",
+          body: "There's a `Sign in` button in the header now. That's the whole setup:",
+          bullets: [
+            "**GitHub only, on purpose** — no email, no password, nothing else to create or remember. Your GitHub identity is the account.",
+            "First sign-in **is** registration — there's no separate sign-up step.",
+            "If you already maintain a package listed in the registry, signing in links to that same profile automatically instead of creating a second, disconnected one.",
+            "Sessions are real server-side records, not just a signed cookie — signing out actually invalidates the session rather than just clearing a token that stays valid until it expires.",
+          ],
+        },
+        {
+          title: "A calmer header",
+          body: "Wiring up sign-in was a good excuse to clean up a header that had picked up a few things it didn't need:",
+          bullets: [
+            "A **live GitHub star count** now sits next to the repo link.",
+            "The app version and the raw sync timestamp moved out of the primary nav — version lives in the footer now, and sync status is a small, quiet indicator instead of a pair of competing badges.",
+            "That indicator still shows the exact freshness (`Updated 12m ago`, hover for the precise time) — it just turns into a clear warning if the registry hasn't synced in over 90 minutes, instead of asking you to notice a rotating number.",
+          ],
+        },
+        {
+          title: "Under the hood",
+          body: "The account model reuses infrastructure that already existed instead of adding a parallel one:",
+          bullets: [
+            "Sign-in writes into the same `users` table the sync worker already maintains, keyed by the same `(source, source_id)` identity — one row per GitHub account, not a second \"registered user\" table living next to the package-owner cache.",
+            "Sessions use Auth.js's database strategy against our own schema, not a bolted-on JWT — sign-out deletes the row server-side.",
+            "No new moving parts to run — just a GitHub OAuth App to configure.",
+          ],
+        },
+      ],
+      links: undefined,
+    },
+    {
       slug: "version-fix-jul-4-2026",
       title: "Correct package versions, safer install commands",
       excerpt:

@@ -1,6 +1,10 @@
 import type { Handle, HandleServerError } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { handle as authHandle } from './auth';
 
-export const handle: Handle = ({ event, resolve }) => resolve(event);
+const appHandle: Handle = ({ event, resolve }) => resolve(event);
+
+export const handle = sequence(authHandle, appHandle);
 
 export const handleError: HandleServerError = ({ error, event }) => {
 	const message = error instanceof Error ? error.message : String(error);

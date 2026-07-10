@@ -33,7 +33,13 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-white text-slate-900">
-  <Header lastSyncedAt={data.lastSyncedAt} />
+  <Header
+    lastSyncedAt={data.lastSyncedAt}
+    lastSyncedAtExact={data.lastSyncedAtExact}
+    syncOverdue={data.syncOverdue}
+    user={data.user}
+    githubStars={data.githubStars}
+  />
   <main class="flex-1 w-full">
     {@render children()}
   </main>

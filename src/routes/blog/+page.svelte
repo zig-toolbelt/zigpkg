@@ -13,6 +13,15 @@
 
   const posts = [
     {
+      title: "Sign in with GitHub, and a calmer header",
+      excerpt:
+        "You can now sign in with GitHub — no email or password to set up. We also used the opportunity to clean up the header: a live star count, version and sync status moved out of your way, and a sync indicator that only speaks up when something's actually wrong.",
+      category: "Updates",
+      date: "Jul 5, 2026",
+      readTime: "2 min read",
+      href: "/blog/github-signin-jul-5-2026",
+    },
+    {
       title: "Correct package versions, safer install commands",
       excerpt:
         "Fixed a bug where packages with no real releases (like sokol-zig) showed a random git tag as their \"current version.\" Versions now come from build.zig.zon and semver-shaped tags only, install commands never pin to a stale ref, and the semver logic moved onto well-tested libraries instead of hand-rolled parsing.",

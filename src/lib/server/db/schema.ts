@@ -10,23 +10,35 @@ import {
 	jsonb,
 	index,
 	check,
-	unique
+	unique,
+	primaryKey
 } from 'drizzle-orm/pg-core';
 
 // Users table - package owners + registered users, scoped by source.
 // Identity is (source, source_id): the same numeric id can recur across
 // hosts (GitHub and Codeberg both start at low ids), so uniqueness is
 // per-source rather than global.
+//
+// id is text (uuid), not serial: @auth/drizzle-adapter's AdapterUser contract
+// requires a string id, since Auth.js core generates it before the row exists.
+// name/email/emailVerified/image are unused (GitHub-only, no email flow) but
+// required by the same adapter contract.
 export const users = pgTable(
 	'users',
 	{
-		id: serial('id').primaryKey(),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
 		source: varchar('source', { length: 20 }).notNull().default('github'),
 		sourceId: bigint('source_id', { mode: 'number' }).notNull(),
 		username: varchar('username', { length: 255 }).notNull(),
 		avatarUrl: text('avatar_url'),
 		bio: text('bio'),
 		htmlUrl: text('html_url'),
+		name: text('name'),
+		email: text('email').unique(),
+		emailVerified: timestamp('email_verified', { withTimezone: true }),
+		image: text('image'),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 	},
@@ -35,6 +47,43 @@ export const users = pgTable(
 		unique('users_source_username_unique').on(table.source, table.username)
 	]
 );
+
+// Accounts table - Auth.js provider linkage. Only GitHub is configured today,
+// but this is what lets Auth.js look up a user by (provider, providerAccountId)
+// without us hand-rolling that lookup against the users table.
+//
+// Token field names are snake_case, not camelCase: they mirror AdapterAccount's
+// contract (@auth/core/adapters), which the DrizzleAdapter reads/writes by these
+// exact JS property names.
+export const accounts = pgTable(
+	'accounts',
+	{
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		type: varchar('type', { length: 255 }).notNull(),
+		provider: varchar('provider', { length: 255 }).notNull(),
+		providerAccountId: varchar('provider_account_id', { length: 255 }).notNull(),
+		refresh_token: text('refresh_token'),
+		access_token: text('access_token'),
+		expires_at: integer('expires_at'),
+		token_type: varchar('token_type', { length: 255 }),
+		scope: varchar('scope', { length: 255 }),
+		id_token: text('id_token'),
+		session_state: varchar('session_state', { length: 255 })
+	},
+	(table) => [primaryKey({ columns: [table.provider, table.providerAccountId] })]
+);
+
+// Sessions table - Auth.js database session strategy. Session rows are real,
+// revocable server state (sign-out deletes the row), unlike a stateless JWT.
+export const sessions = pgTable('sessions', {
+	sessionToken: text('session_token').primaryKey(),
+	userId: text('user_id')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	expires: timestamp('expires', { withTimezone: true }).notNull()
+});
 
 // Packages table - cache for repositories from each source.
 export const packages = pgTable(
@@ -45,7 +94,7 @@ export const packages = pgTable(
 		sourceId: bigint('source_id', { mode: 'number' }).notNull(),
 		name: varchar('name', { length: 255 }).notNull(),
 		fullName: varchar('full_name', { length: 512 }).notNull(),
-		ownerId: integer('owner_id')
+		ownerId: text('owner_id')
 			.notNull()
 			.references(() => users.id),
 		description: text('description'),

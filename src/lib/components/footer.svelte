@@ -82,7 +82,7 @@
     <div
       class="mt-10 flex flex-col items-start justify-between gap-3 border-t border-slate-200 pt-6 font-mono text-xs text-slate-500 sm:flex-row sm:items-center"
     >
-      <p>© 2026 zigpkg</p>
+      <p>© 2026 zigpkg <span class="text-slate-400">· v{APP_VERSION}</span></p>
       <p class="text-slate-400">Made for the Zig community</p>
     </div>
   </div>

@@ -1,7 +1,7 @@
 {
   "name": "zigpkg",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -45,6 +45,8 @@
   },
   "dependencies": {
     "@asciidoctor/core": "^4.0.0",
+    "@auth/drizzle-adapter": "^1.11.2",
+    "@auth/sveltekit": "^1.11.2",
     "clsx": "^2.1.1",
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",

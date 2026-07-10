@@ -40,6 +40,7 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 		totalCount,
 		totalStars: stats.totalStars,
 		packages: pkgs.map((pkg) => ({
+			id: pkg.id,
 			name: pkg.name,
 			fullName: pkg.fullName,
 			source: pkg.source,

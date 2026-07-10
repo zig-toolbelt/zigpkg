@@ -1,13 +1,32 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { onMount } from "svelte";
-  import { Search, X } from "lucide-svelte";
+  import { CircleAlert, Search, Star, X } from "lucide-svelte";
+  import { signIn, signOut } from "@auth/sveltekit/client";
 
   import Logo from "$lib/components/logo.svelte";
   import SearchBar from "$lib/components/search-bar.svelte";
-  import Badge from "$lib/components/ui/badge.svelte";
 
-  let { lastSyncedAt = null }: { lastSyncedAt: string | null } = $props();
+  type HeaderUser = {
+    username: string | undefined;
+    avatarUrl: string | null | undefined;
+  } | null;
+
+  let {
+    lastSyncedAt = null,
+    lastSyncedAtExact = null,
+    syncOverdue = false,
+    user = null,
+    githubStars = null,
+  }: {
+    lastSyncedAt: string | null;
+    lastSyncedAtExact?: string | null;
+    syncOverdue?: boolean;
+    user?: HeaderUser;
+    githubStars?: number | null;
+  } = $props();
+
+  const starCountFormatter = new Intl.NumberFormat("en", { notation: "compact" });
 
   let mobileSearchOpen = $state(false);
   let scrolled = $state(false);
@@ -47,15 +66,24 @@
         </div>
       {/if}
 
-      <!-- Right: nav + socials -->
-      <div class="flex items-center gap-1.5 shrink-0">
-        <div class="hidden items-center gap-1.5 lg:flex">
-          <Badge variant="zig">v{APP_VERSION}</Badge>
-          {#if lastSyncedAt}
-            <Badge variant="zig">synced: {lastSyncedAt}</Badge>
-          {/if}
-        </div>
-        <div class="hidden h-4 w-px bg-slate-200 lg:block"></div>
+      <!-- Right: status + nav + actions -->
+      <div class="flex items-center gap-2.5 shrink-0">
+        {#if lastSyncedAt}
+          <div
+            class="hidden items-center gap-1.5 font-mono text-[11px] lg:flex {syncOverdue
+              ? 'text-amber-700'
+              : 'text-slate-500'}"
+            title={lastSyncedAtExact ? `Last synced ${lastSyncedAtExact}` : undefined}
+          >
+            {#if syncOverdue}
+              <CircleAlert class="h-3 w-3 shrink-0" />
+            {:else}
+              <span class="h-1.5 w-1.5 rounded-full bg-zig-400"></span>
+            {/if}
+            {lastSyncedAt}
+          </div>
+          <div class="hidden h-4 w-px bg-slate-200 lg:block"></div>
+        {/if}
 
         <nav class="hidden items-center gap-1 sm:flex" aria-label="Primary navigation">
           {#each navItems as item (item.href)}
@@ -90,22 +118,41 @@
 
         <a
           href="https://github.com/zig-toolbelt/zigpkg"
-          class="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 py-1.5 pl-2.5 pr-2.5 font-mono text-xs font-medium text-slate-600 transition-colors hover:border-zig-300 hover:bg-zig-50 hover:text-zig-700"
           rel="noopener noreferrer"
           target="_blank"
         >
+          <svg class="h-3.5 w-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.562 21.8 24 17.303 24 12c0-6.627-5.373-12-12-12z"/></svg>
           <span class="sr-only">GitHub</span>
-          <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.562 21.8 24 17.303 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          {#if githubStars !== null}
+            <span class="inline-flex items-center gap-1">
+              <Star class="h-3 w-3 shrink-0 fill-zig-400 text-zig-400" />
+              {starCountFormatter.format(githubStars)}
+            </span>
+          {/if}
         </a>
-        <a
-          href="https://x.com/i/communities/1830711127354851778"
-          class="hidden h-8 w-8 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 sm:inline-flex"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <span class="sr-only">X (Twitter)</span>
-          <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        </a>
+
+        {#if user}
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-md py-1 pl-1 pr-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            onclick={() => signOut()}
+            title="Sign out ({user.username ?? 'account'})"
+          >
+            {#if user.avatarUrl}
+              <img src={user.avatarUrl} alt={user.username ?? "Account"} class="h-6 w-6 rounded-full" />
+            {/if}
+            <span class="hidden font-mono text-xs font-medium sm:inline">{user.username ?? "Account"}</span>
+          </button>
+        {:else}
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 font-mono text-xs font-medium text-white transition-colors hover:bg-slate-800"
+            onclick={() => signIn("github")}
+          >
+            Sign in
+          </button>
+        {/if}
       </div>
     </div>
 

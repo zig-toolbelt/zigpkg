@@ -101,7 +101,7 @@ type UpsertPackageParams struct {
 	SourceID      int64
 	Name          string
 	FullName      string
-	OwnerID       int32
+	OwnerID       string
 	Description   pgtype.Text
 	Version       pgtype.Text
 	Stars         int32
@@ -184,7 +184,7 @@ type UpsertUserParams struct {
 	HtmlUrl   pgtype.Text
 }
 
-func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (int32, error) {
+func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (string, error) {
 	row := q.db.QueryRow(ctx, upsertUser,
 		arg.Source,
 		arg.SourceID,
@@ -193,7 +193,7 @@ func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (int32, 
 		arg.Bio,
 		arg.HtmlUrl,
 	)
-	var id int32
+	var id string
 	err := row.Scan(&id)
 	return id, err
 }

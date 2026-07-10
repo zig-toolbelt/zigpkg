@@ -101,6 +101,23 @@ export class GitHubClient {
     return response.json();
   }
 
+  async getStarCount(owner: string, repo: string): Promise<number | null> {
+    this.checkRateLimit();
+
+    const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`;
+    this.rateLimitRemaining = Math.max(0, this.rateLimitRemaining - 1);
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: this.getHeaders(),
+    });
+    this.updateRateLimit(response);
+
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as { stargazers_count?: number };
+    return data.stargazers_count ?? null;
+  }
+
   async getContents(
     owner: string,
     repo: string,
