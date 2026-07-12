@@ -81,6 +81,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		session({ session, user }) {
 			session.user.username = user.username;
 			session.user.avatarUrl = user.avatarUrl;
+			session.user.htmlUrl = user.htmlUrl;
 			return session;
 		}
 	}

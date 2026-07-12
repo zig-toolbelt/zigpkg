@@ -13,6 +13,15 @@
 
   const posts = [
     {
+      title: "Account dropdown replaces accidental sign-out",
+      excerpt:
+        "Clicking your avatar used to sign you out immediately — one misclick and you were logged out. Now it opens a menu with your GitHub profile link, a shortcut to your packages, and a deliberate \"Sign out\" button at the bottom.",
+      category: "Updates",
+      date: "Jul 12, 2026",
+      readTime: "1 min read",
+      href: "/blog/account-dropdown-jul-12-2026",
+    },
+    {
       title: "Sign in with GitHub, and a calmer header",
       excerpt:
         "You can now sign in with GitHub — no email or password to set up. We also used the opportunity to clean up the header: a live star count, version and sync status moved out of your way, and a sync indicator that only speaks up when something's actually wrong.",

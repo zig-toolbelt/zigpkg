@@ -41,6 +41,43 @@
 
   const posts: Post[] = [
     {
+      slug: "account-dropdown-jul-12-2026",
+      title: "Account dropdown replaces accidental sign-out",
+      excerpt:
+        "Clicking your avatar used to sign you out immediately — one misclick and you were logged out. Now it opens a menu with your GitHub profile link, a shortcut to your packages, and a deliberate \"Sign out\" button at the bottom.",
+      category: "Updates",
+      date: "Jul 12, 2026",
+      readTime: "1 min read",
+      author: "zigpkg team",
+      callout: {
+        before: { label: "Before", value: "Click avatar → sign out" },
+        after: { label: "After", value: "Click avatar → menu" },
+      },
+      sections: [
+        {
+          title: "The problem",
+          body:
+            "Since we shipped sign-in, the avatar in the header had exactly one job: sign you out. That meant one accidental click while trying to open a new tab, and you were back at the Sign in button wondering where your session went.",
+        },
+        {
+          title: "What changed",
+          body: "The avatar is now a proper account menu:",
+          bullets: [
+            "**Your username** and a link to your **GitHub profile** at the top.",
+            "A **\"Your packages\"** shortcut that takes you straight to `/packages/{username}` — no search required.",
+            "**Sign out** is now a deliberate button at the bottom of the menu, not the only thing that happens on click.",
+            "Clicking outside the menu, or clicking the avatar again, closes it.",
+          ],
+        },
+        {
+          title: "Under the hood",
+          body:
+            "The `htmlUrl` from your GitHub profile is now included in the session, so the menu can show a link back without an extra query. The dropdown lives in the same `header.svelte` component with a `$state` toggle and a document click listener, keeping the implementation self-contained.",
+        },
+      ],
+      links: undefined,
+    },
+    {
       slug: "github-signin-jul-5-2026",
       title: "Sign in with GitHub, and a calmer header",
       excerpt:
