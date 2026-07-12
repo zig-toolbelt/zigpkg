@@ -100,7 +100,7 @@
           <button
             onclick={() => navigate({ type: null, page: 1 })}
             aria-label="Remove filter: {activeTypeLabel}"
-            class="inline-flex items-center gap-1 rounded-sm border border-zig-400/50 bg-zig-500/10 px-1.5 py-0.5 text-zig-700 transition-colors hover:bg-zig-500/20"
+            class="inline-flex items-center gap-1 rounded-sm border border-zig-400/50 bg-zig-500/10 px-1.5 py-0.5 text-zig-700 transition-colors cursor-pointer hover:bg-zig-500/20"
           >
             {activeTypeLabel}
             <span aria-hidden="true">×</span>
@@ -110,7 +110,7 @@
           <button
             onclick={() => navigate({ topic: null, page: 1 })}
             aria-label="Remove topic filter: {data.topic}"
-            class="inline-flex items-center gap-1 rounded-sm border border-zig-400/50 bg-zig-500/10 px-1.5 py-0.5 text-zig-700 transition-colors hover:bg-zig-500/20"
+            class="inline-flex items-center gap-1 rounded-sm border border-zig-400/50 bg-zig-500/10 px-1.5 py-0.5 text-zig-700 transition-colors cursor-pointer hover:bg-zig-500/20"
           >
             {data.topic}
             <span aria-hidden="true">×</span>
@@ -120,7 +120,7 @@
           <button
             onclick={() => navigate({ letter: null, page: 1 })}
             aria-label="Remove letter filter: {data.letter}"
-            class="inline-flex items-center gap-1 rounded-sm border border-zig-400/50 bg-zig-500/10 px-1.5 py-0.5 text-zig-700 transition-colors hover:bg-zig-500/20"
+            class="inline-flex items-center gap-1 rounded-sm border border-zig-400/50 bg-zig-500/10 px-1.5 py-0.5 text-zig-700 transition-colors cursor-pointer hover:bg-zig-500/20"
           >
             {data.letter}
             <span aria-hidden="true">×</span>
@@ -144,7 +144,7 @@
         <button
           onclick={() => navigate({ type: tab.value, page: 1 })}
           aria-pressed={data.type === tab.value}
-          class="h-7 rounded-sm px-2 font-mono text-xs transition-colors {data.type ===
+          class="h-7 rounded-sm px-2 font-mono text-xs transition-colors cursor-pointer {data.type ===
           tab.value
             ? 'border border-zig-400/50 bg-zig-500/10 text-zig-700'
             : 'border border-transparent text-slate-500 hover:bg-slate-100'}"
@@ -160,7 +160,7 @@
         <button
           onclick={() => navigate({ sort: option.value, page: 1 })}
           aria-pressed={data.sort === option.value}
-          class="h-7 rounded-sm px-2 font-mono text-xs transition-colors {data.sort ===
+          class="h-7 rounded-sm px-2 font-mono text-xs transition-colors cursor-pointer {data.sort ===
           option.value
             ? 'border border-zig-400/50 bg-zig-500/10 text-zig-700'
             : 'border border-transparent text-slate-500 hover:bg-slate-100'}"
@@ -184,7 +184,7 @@
           onclick={() =>
             navigate({ topic: data.topic === topic ? null : topic, page: 1 })}
           aria-pressed={data.topic === topic}
-          class="h-7 rounded-full px-3 font-mono text-xs transition-colors {data.topic ===
+          class="h-7 rounded-full px-3 font-mono text-xs transition-colors cursor-pointer {data.topic ===
           topic
             ? 'border border-zig-400/50 bg-zig-500/10 text-zig-700'
             : 'border border-slate-200 text-slate-500 hover:border-zig-400 hover:text-zig-700'}"
