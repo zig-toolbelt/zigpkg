@@ -18,6 +18,7 @@
   import { formatRelativeDate } from "$lib/utils/formatRelativeDate";
   import { formatNumber } from "$lib/utils/formatNumber";
   import { buildCanonical } from "$lib/seo";
+  import { packageDescription } from "$lib/utils/packageDescription";
 
   let { data } = $props();
 
@@ -30,10 +31,7 @@
   const sourceLabel = $derived(pkg.source === "codeberg" ? "Codeberg" : "GitHub");
   const heroTopics = $derived(pkg.topics.slice(0, 5));
 
-  const description = $derived(
-    pkg.description ||
-      `${pkg.name} — a Zig ${pkg.packageType} by ${pkg.owner}. View source, install instructions, and documentation on zigpkg.`,
-  );
+  const description = $derived(packageDescription(pkg));
   const canonical = $derived(buildCanonical(`/packages/${pkg.fullName}`));
   const jsonLd = $derived(
     JSON.stringify({
@@ -54,14 +52,6 @@
 </script>
 
 <svelte:head>
-  <title>{pkg.name} - zigpkg</title>
-  <meta name="description" content={description} />
-  <meta property="og:title" content={`${pkg.name} — zigpkg`} />
-  <meta property="og:description" content={description} />
-  <meta property="og:url" content={canonical} />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:title" content={`${pkg.name} — zigpkg`} />
-  <meta name="twitter:description" content={description} />
   {@html '<script type="application/ld+json">' + jsonLd + "<\/script>"}
 </svelte:head>
 

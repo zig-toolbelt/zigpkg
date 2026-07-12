@@ -13,6 +13,15 @@
 
   const posts = [
     {
+      title: "Package links now unfurl with real previews",
+      excerpt:
+        "Pasting a zigpkg link into Slack, Discord, or a forum used to show the generic site card no matter what you linked to. Now you get the real package name and description, plus a generated preview image with stars, license, and the maintainer's avatar.",
+      category: "Updates",
+      date: "Jul 12, 2026",
+      readTime: "2 min read",
+      href: "/blog/link-previews-jul-12-2026",
+    },
+    {
       title: "Owner pages no longer 404 for new users",
       excerpt:
         "Signing in and clicking \"Your packages\" used to throw a 404 if you hadn't published any Zig packages yet. Now you get a proper owner page with your avatar, GitHub link, and a \"No packages yet\" placeholder.",

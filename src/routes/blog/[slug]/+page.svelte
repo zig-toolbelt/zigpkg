@@ -41,6 +41,44 @@
 
   const posts: Post[] = [
     {
+      slug: "link-previews-jul-12-2026",
+      title: "Package links now unfurl with real previews",
+      excerpt:
+        "Pasting a package or profile link into Slack, Discord, or a forum used to show the generic zigpkg site card. Now you get the real name and description, plus a generated preview image with stars, license, and the maintainer's avatar — like sharing a GitHub repo.",
+      category: "Updates",
+      date: "Jul 12, 2026",
+      readTime: "2 min read",
+      author: "zigpkg team",
+      callout: {
+        before: { label: "Before", value: "zigpkg — Zig Package Registry" },
+        after: { label: "After", value: "http.zig — An HTTP/1.1 server for zig" },
+      },
+      sections: [
+        {
+          title: "The problem",
+          body:
+            "Every page set its own title and description tags on top of the site-wide defaults — but SvelteKit doesn't replace a layout's `<svelte:head>` with a page's, it concatenates both. The rendered HTML ended up with two `og:title` tags and two `og:description` tags, generic ones first. Most link-unfurl bots read the first tag they find, so shares kept showing \"zigpkg — Zig Package Registry\" no matter which package you linked to. The fallback image had the same problem one level deeper: it pointed at a file that didn't exist.",
+        },
+        {
+          title: "What changed",
+          bullets: [
+            "**One set of tags, one source of truth** — title, description, and Open Graph/Twitter Card tags are now built in a single place and filled in per page, so there's nothing left for a scraper to pick the wrong copy of.",
+            "**Package and owner pages get a real preview image** — name, stars, license, and the maintainer's avatar, generated on the fly, instead of the plain site logo.",
+            "**The sitewide fallback image works again** — every other page (home, docs) now points at an image that actually exists.",
+          ],
+        },
+        {
+          title: "Under the hood",
+          body: "Preview images render server-side with Satori — the same approach GitHub and Vercel use for their social cards:",
+          bullets: [
+            "No headless browser or native binary to deploy, just WASM, so it runs fine anywhere the app already does.",
+            "Each package and owner page exposes its own `/og-image` route; the PNG is generated per URL and cached by whatever platform is unfurling it, so repeat shares are free.",
+          ],
+        },
+      ],
+      links: undefined,
+    },
+    {
       slug: "owner-page-jul-12-2026",
       title: "Owner pages no longer 404 for new users",
       excerpt:

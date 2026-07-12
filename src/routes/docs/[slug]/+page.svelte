@@ -15,11 +15,6 @@
 	const DocIcon = $derived(iconMap[data.doc.icon] ?? BookOpen);
 </script>
 
-<svelte:head>
-	<title>{data.doc.title} - ZigPkg Docs</title>
-	<meta name="description" content={data.doc.description} />
-</svelte:head>
-
 <section class="border-b border-zig-100 bg-zig-50">
 	<div class="mx-auto max-w-7xl px-6 py-12 sm:px-10 sm:py-14">
 		<a

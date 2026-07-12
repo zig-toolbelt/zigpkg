@@ -9,6 +9,7 @@ import {
 } from '$lib/server/packages/queries';
 import { ownerUrl } from '$lib/providers';
 import { NO_VERSION } from '$lib/utils/version';
+import { buildCanonical, siteUrl } from '$lib/seo';
 
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const { owner } = params;
@@ -44,7 +45,14 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 			profileUrl: ownerUrl(profile.source ?? 'github', profile.username),
 			totalCount: 0,
 			totalStars: 0,
-			packages: []
+			packages: [],
+			seo: {
+				title: `${owner} — zigpkg`,
+				description: `Zig packages published by ${owner} on zigpkg.`,
+				image: `${siteUrl()}/packages/${owner}/og-image`,
+				url: buildCanonical(`/packages/${owner}`),
+				type: 'website'
+			}
 		};
 	}
 
@@ -61,6 +69,13 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 		profileUrl: ownerUrl(source, owner),
 		totalCount,
 		totalStars: stats.totalStars,
+		seo: {
+			title: `${owner} — zigpkg`,
+			description: `Zig packages published by ${owner} on zigpkg — ${totalCount} package${totalCount === 1 ? '' : 's'}.`,
+			image: `${siteUrl()}/packages/${owner}/og-image`,
+			url: buildCanonical(`/packages/${owner}`),
+			type: 'website'
+		},
 		packages: pkgs.map((pkg) => ({
 			id: pkg.id,
 			name: pkg.name,

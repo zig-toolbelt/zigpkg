@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { loadDocs } from '$lib/docs/server';
+import { buildCanonical } from '$lib/seo';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ params }) => {
@@ -10,5 +11,13 @@ export const load: PageServerLoad = ({ params }) => {
 		error(404, 'Documentation page not found');
 	}
 
-	return { doc, docs };
+	return {
+		doc,
+		docs,
+		seo: {
+			title: `${doc.title} - ZigPkg Docs`,
+			description: doc.description,
+			url: buildCanonical(`/docs/${doc.slug}`)
+		}
+	};
 };

@@ -8,6 +8,8 @@ import { getContentClient } from '$lib/server/content-client';
 import { getPackageContent } from '$lib/server/packages/content';
 import { ownerUrl } from '$lib/providers';
 import { resolveDisplayVersion, resolveInstallRef } from '$lib/utils/version';
+import { packageDescription } from '$lib/utils/packageDescription';
+import { buildCanonical, siteUrl } from '$lib/seo';
 
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const fullName = `${params.owner}/${params.repo}`;
@@ -59,6 +61,8 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const licenseFile = fileList.find((f) => LICENSE_NAMES.has(f.name.toUpperCase()));
 	const licenseFileUrl = licenseFile?.htmlUrl ?? null;
 
+	const description = packageDescription(pkg);
+
 	setHeaders(
 		contentDegraded
 			? { 'Cache-Control': 'no-store' }
@@ -100,6 +104,13 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 				}
 			: null,
 		contentDegraded,
-		licenseFileUrl
+		licenseFileUrl,
+		seo: {
+			title: `${pkg.name} — zigpkg`,
+			description,
+			image: `${siteUrl()}/packages/${pkg.fullName}/og-image`,
+			url: buildCanonical(`/packages/${pkg.fullName}`),
+			type: 'website'
+		}
 	};
 };

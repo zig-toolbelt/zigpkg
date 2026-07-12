@@ -32,19 +32,6 @@
   }
 </script>
 
-<svelte:head>
-  <title>{data.owner} - zigpkg</title>
-  <meta
-    name="description"
-    content={`Zig packages published by ${data.owner} on zigpkg — ${data.totalCount} package${data.totalCount !== 1 ? "s" : ""}.`}
-  />
-  <meta property="og:title" content={`${data.owner} — zigpkg`} />
-  <meta
-    property="og:description"
-    content={`Zig packages published by ${data.owner} on zigpkg.`}
-  />
-</svelte:head>
-
 <div
   class="mx-auto max-w-7xl px-6 py-10 text-slate-900 selection:bg-zig-200 selection:text-black sm:px-10"
 >
