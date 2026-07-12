@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { onMount } from "svelte";
-  import { CircleAlert, Search, Star, X } from "lucide-svelte";
+  import { ChevronDown, CircleAlert, ExternalLink, LogOut, Package, Search, Star, X } from "lucide-svelte";
   import { signIn, signOut } from "@auth/sveltekit/client";
 
   import Logo from "$lib/components/logo.svelte";
@@ -10,6 +10,7 @@
   type HeaderUser = {
     username: string | undefined;
     avatarUrl: string | null | undefined;
+    htmlUrl: string | null | undefined;
   } | null;
 
   let {
@@ -30,6 +31,8 @@
 
   let mobileSearchOpen = $state(false);
   let scrolled = $state(false);
+  let dropdownOpen = $state(false);
+  let dropdownRef: HTMLDivElement | undefined = $state();
 
   const navItems = [
     { label: "Browse", href: "/packages", match: "/packages" },
@@ -42,10 +45,20 @@
       scrolled = window.scrollY > 4;
     };
 
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownOpen && dropdownRef && !dropdownRef.contains(e.target as Node)) {
+        dropdownOpen = false;
+      }
+    };
+
     updateScrolled();
     window.addEventListener("scroll", updateScrolled, { passive: true });
+    document.addEventListener("click", handleClickOutside);
 
-    return () => window.removeEventListener("scroll", updateScrolled);
+    return () => {
+      window.removeEventListener("scroll", updateScrolled);
+      document.removeEventListener("click", handleClickOutside);
+    };
   });
 </script>
 
@@ -133,17 +146,60 @@
         </a>
 
         {#if user}
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 rounded-md py-1 pl-1 pr-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
-            onclick={() => signOut()}
-            title="Sign out ({user.username ?? 'account'})"
-          >
-            {#if user.avatarUrl}
-              <img src={user.avatarUrl} alt={user.username ?? "Account"} class="h-6 w-6 rounded-full" />
+          <div class="relative" bind:this={dropdownRef}>
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 rounded-md py-1 pl-1 pr-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+              onclick={() => (dropdownOpen = !dropdownOpen)}
+              title="Account menu"
+            >
+              {#if user.avatarUrl}
+                <img src={user.avatarUrl} alt={user.username ?? "Account"} class="h-6 w-6 rounded-full" />
+              {/if}
+              <span class="hidden font-mono text-xs font-medium sm:inline">{user.username ?? "Account"}</span>
+              <ChevronDown class="hidden h-3 w-3 sm:block {dropdownOpen ? 'rotate-180' : ''} transition-transform" />
+            </button>
+
+            {#if dropdownOpen}
+              <div class="absolute right-0 top-full z-50 mt-1 w-56 rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                <div class="border-b border-slate-100 px-3 py-2.5">
+                  <p class="text-xs font-medium text-slate-900">{user.username ?? "Account"}</p>
+                  {#if user.htmlUrl}
+                    <a
+                      href={user.htmlUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="mt-0.5 inline-flex items-center gap-1 font-mono text-[11px] text-slate-400 hover:text-zig-600"
+                    >
+                      GitHub profile
+                      <ExternalLink class="h-2.5 w-2.5" />
+                    </a>
+                  {/if}
+                </div>
+
+                <div class="py-0.5">
+                  <a
+                    href="/packages/{user.username ?? ''}"
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  >
+                    <Package class="h-3.5 w-3.5" />
+                    Your packages
+                  </a>
+                </div>
+
+                <div class="border-t border-slate-100 py-0.5">
+                  <button
+                    type="button"
+                    class="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-red-600"
+                    onclick={() => signOut()}
+                  >
+                    <LogOut class="h-3.5 w-3.5" />
+                    Sign out
+                  </button>
+                </div>
+              </div>
             {/if}
-            <span class="hidden font-mono text-xs font-medium sm:inline">{user.username ?? "Account"}</span>
-          </button>
+          </div>
         {:else}
           <button
             type="button"

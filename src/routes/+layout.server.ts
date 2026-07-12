@@ -31,7 +31,7 @@ export const load: LayoutServerLoad = async (event) => {
 		: null;
 
 	const user = session?.user
-		? { username: session.user.username, avatarUrl: session.user.avatarUrl }
+		? { username: session.user.username, avatarUrl: session.user.avatarUrl, htmlUrl: session.user.htmlUrl }
 		: null;
 
 	return { lastSyncedAt, lastSyncedAtExact, syncOverdue, user, githubStars };
