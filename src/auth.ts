@@ -39,6 +39,7 @@ const adapter: Adapter = {
 		if (providerAccount.provider !== 'github') return null;
 
 		const sourceId = Number(providerAccount.providerAccountId);
+		if (isNaN(sourceId)) return null;
 		const [existing] = await db
 			.select()
 			.from(users)
@@ -60,6 +61,7 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 			clientSecret: env.AUTH_GITHUB_SECRET,
 			profile(profile: GitHubProfile) {
 				return {
+					id: profile.id.toString(),
 					source: 'github',
 					sourceId: profile.id,
 					username: profile.login,
