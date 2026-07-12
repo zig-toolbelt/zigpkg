@@ -213,6 +213,28 @@ export async function getPackageByFullNameCaseInsensitive(fullName: string) {
 	};
 }
 
+type OwnerProfile = {
+	username: string;
+	avatarUrl: string | null;
+	htmlUrl: string | null;
+	source: string | null;
+};
+
+export async function getOwnerProfile(owner: string): Promise<OwnerProfile | undefined> {
+	const [result] = await db
+		.select({
+			username: users.username,
+			avatarUrl: users.avatarUrl,
+			htmlUrl: users.htmlUrl,
+			source: users.source
+		})
+		.from(users)
+		.where(sql`lower(${users.username}) = lower(${owner})`)
+		.limit(1);
+
+	return result ?? undefined;
+}
+
 export async function getOwnerCanonical(owner: string): Promise<string | undefined> {
 	const [result] = await db
 		.select({ username: users.username })

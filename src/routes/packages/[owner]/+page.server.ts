@@ -4,7 +4,8 @@ import {
 	getPackages,
 	getFilteredPackageCount,
 	getOwnerStats,
-	getOwnerCanonical
+	getOwnerCanonical,
+	getOwnerProfile
 } from '$lib/server/packages/queries';
 import { ownerUrl } from '$lib/providers';
 import { NO_VERSION } from '$lib/utils/version';
@@ -20,10 +21,31 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 
 	if (totalCount === 0) {
 		const canonical = await getOwnerCanonical(owner);
-		if (canonical && canonical !== owner) {
+		if (!canonical) {
+			error(404, { message: 'Owner not found' });
+		}
+		if (canonical !== owner) {
 			redirect(301, `/packages/${canonical}`);
 		}
-		error(404, { message: 'Owner not found' });
+
+		const profile = await getOwnerProfile(owner);
+		if (!profile) {
+			error(404, { message: 'Owner not found' });
+		}
+
+		setHeaders({
+			'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600'
+		});
+
+		return {
+			owner,
+			ownerAvatarUrl: profile.avatarUrl,
+			source: profile.source ?? 'github',
+			profileUrl: ownerUrl(profile.source ?? 'github', profile.username),
+			totalCount: 0,
+			totalStars: 0,
+			packages: []
+		};
 	}
 
 	setHeaders({

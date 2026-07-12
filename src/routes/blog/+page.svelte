@@ -13,6 +13,15 @@
 
   const posts = [
     {
+      title: "Owner pages no longer 404 for new users",
+      excerpt:
+        "Signing in and clicking \"Your packages\" used to throw a 404 if you hadn't published any Zig packages yet. Now you get a proper owner page with your avatar, GitHub link, and a \"No packages yet\" placeholder.",
+      category: "Updates",
+      date: "Jul 12, 2026",
+      readTime: "1 min read",
+      href: "/blog/owner-page-jul-12-2026",
+    },
+    {
       title: "Account dropdown replaces accidental sign-out",
       excerpt:
         "Clicking your avatar used to sign you out immediately — one misclick and you were logged out. Now it opens a menu with your GitHub profile link, a shortcut to your packages, and a deliberate \"Sign out\" button at the bottom.",

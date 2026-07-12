@@ -41,6 +41,37 @@
 
   const posts: Post[] = [
     {
+      slug: "owner-page-jul-12-2026",
+      title: "Owner pages no longer 404 for new users",
+      excerpt:
+        "Signing in and clicking \"Your packages\" used to throw a 404 if you hadn't published any Zig packages yet. Now you get a proper owner page with your avatar, GitHub link, and a \"No packages yet\" placeholder — no more confusing error pages.",
+      category: "Updates",
+      date: "Jul 12, 2026",
+      readTime: "1 min read",
+      author: "zigpkg team",
+      callout: {
+        before: { label: "Before", value: "404 Owner not found" },
+        after: { label: "After", value: "Owner page, no packages yet" },
+      },
+      sections: [
+        {
+          title: "The problem",
+          body:
+            "A new user would sign in, click their avatar, pick \"Your packages,\" and land on a 404 page. The lookup only scanned the `packages` table — if your repos weren't indexed (or you simply hadn't tagged any with `zig-package`), the page assumed the owner didn't exist at all.",
+        },
+        {
+          title: "What changed",
+          body: "The owner route now checks the `users` table separately from the `packages` table:",
+          bullets: [
+            "**Owner exists, zero packages** → a proper owner page with your avatar, GitHub profile link, and a \"No packages yet\" placeholder instead of a 404.",
+            "**Owner doesn't exist** → still a 404.",
+            "**Different letter case** → redirects to the canonical username, same as before.",
+          ],
+        },
+      ],
+      links: undefined,
+    },
+    {
       slug: "account-dropdown-jul-12-2026",
       title: "Account dropdown replaces accidental sign-out",
       excerpt:

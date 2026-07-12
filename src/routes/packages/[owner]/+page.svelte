@@ -11,6 +11,7 @@
     Check,
     ChevronLeft,
     ExternalLink,
+    Package,
   } from "lucide-svelte";
   import { archiveFetchUrl } from "$lib/providers";
   import { hasVersion } from "$lib/utils/version";
@@ -114,7 +115,8 @@
   </div>
 
   <!-- Packages Grid -->
-  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+  {#if data.packages.length > 0}
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
     {#each data.packages as pkg (pkg.id)}
       <div
         class="group flex flex-col rounded-lg border border-slate-200 bg-white p-5 transition-all hover:border-zig-300 hover:shadow-[0_4px_14px_rgb(15_23_42_/_0.06)]"
@@ -187,5 +189,16 @@
         </footer>
       </div>
     {/each}
-  </div>
+    </div>
+  {:else}
+    <div class="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 py-16 text-center">
+      <div class="flex h-12 w-12 items-center justify-center rounded-full bg-zig-100 text-zig-600">
+        <Package class="h-6 w-6" />
+      </div>
+      <h3 class="mt-4 text-base font-semibold text-slate-900">No packages yet</h3>
+      <p class="mt-1 text-sm text-slate-500">
+        {data.owner} hasn't published any Zig packages yet.
+      </p>
+    </div>
+  {/if}
 </div>
