@@ -4,6 +4,7 @@ import {
 	serial,
 	bigint,
 	integer,
+	boolean,
 	text,
 	timestamp,
 	varchar,
@@ -11,7 +12,8 @@ import {
 	index,
 	check,
 	unique,
-	primaryKey
+	primaryKey,
+	type AnyPgColumn
 } from 'drizzle-orm/pg-core';
 
 // Users table - package owners + registered users, scoped by source.
@@ -39,6 +41,12 @@ export const users = pgTable(
 		email: text('email').unique(),
 		emailVerified: timestamp('email_verified', { withTimezone: true }),
 		image: text('image'),
+		// Moderation: set by an admin via /admin/users. bannedAt is null for an
+		// active account; setting it invalidates the user's session on the next
+		// request (see src/auth.ts session callback). bannedBy records which
+		// admin issued the ban for audit.
+		bannedAt: timestamp('banned_at', { withTimezone: true }),
+		bannedBy: text('banned_by').references((): AnyPgColumn => users.id),
 		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull()
 	},
@@ -110,7 +118,22 @@ export const packages = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
 		pushedAt: timestamp('pushed_at', { withTimezone: true }).notNull(),
-		cachedAt: timestamp('cached_at', { withTimezone: true }).defaultNow().notNull()
+		cachedAt: timestamp('cached_at', { withTimezone: true }).defaultNow().notNull(),
+		// Moderation: 'approved' (visible), 'pending' (awaiting review), 'rejected'.
+		// Sync job writes 'approved'; manual submissions start 'pending'.
+		status: varchar('status', { length: 20 }).notNull().default('approved'),
+		// Origin: 'sync' (auto-discovered by jobs/sync) or 'manual' (user-submitted).
+		origin: varchar('origin', { length: 20 }).notNull().default('sync'),
+		submittedBy: text('submitted_by').references(() => users.id),
+		submittedAt: timestamp('submitted_at', { withTimezone: true }),
+		reviewedBy: text('reviewed_by').references(() => users.id),
+		reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+		rejectionReason: text('rejection_reason'),
+		// Cached validation signals computed at submission time; nullable for
+		// sync-origin rows that have not been validated yet.
+		primaryLanguage: varchar('primary_language', { length: 50 }),
+		hasZigFiles: boolean('has_zig_files'),
+		hasBuildZigZon: boolean('has_build_zig_zon')
 	},
 	(table) => [
 		unique('packages_source_source_id_unique').on(table.source, table.sourceId),
@@ -119,7 +142,11 @@ export const packages = pgTable(
 		index('packages_cached_idx').on(table.cachedAt),
 		index('packages_type_idx').on(table.packageType),
 		index('packages_owner_idx').on(table.ownerId),
-		check('packages_package_type_check', sql`${table.packageType} IN ('library', 'application')`)
+		index('packages_status_idx').on(table.status),
+		index('packages_origin_idx').on(table.origin),
+		check('packages_package_type_check', sql`${table.packageType} IN ('library', 'application')`),
+		check('packages_status_check', sql`${table.status} IN ('approved', 'pending', 'rejected')`),
+		check('packages_origin_check', sql`${table.origin} IN ('sync', 'manual')`)
 	]
 );
 

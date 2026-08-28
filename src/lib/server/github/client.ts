@@ -1,10 +1,11 @@
 import type {
   GitHubTag,
   GitHubContent,
+  GitHubRepository,
 } from "$lib/types/github";
 import { env } from "$env/dynamic/private";
 import { RateLimitError } from "./errors";
-import type { ReadmeSource } from "$lib/server/content-client";
+import type { ReadmeSource, RepoMetadata } from "$lib/server/content-client";
 
 const GITHUB_API_BASE = "https://api.github.com";
 
@@ -160,6 +161,118 @@ export class GitHubClient {
     if (!response.ok) return null;
 
     return response.text();
+  }
+
+  async getRepo(
+    owner: string,
+    repo: string,
+  ): Promise<RepoMetadata | null> {
+    this.checkRateLimit();
+
+    const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`;
+    this.rateLimitRemaining = Math.max(0, this.rateLimitRemaining - 1);
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: this.getHeaders(),
+    });
+    this.updateRateLimit(response);
+
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as GitHubRepository;
+    return {
+      sourceId: data.id,
+      name: data.name,
+      fullName: data.full_name,
+      ownerLogin: data.owner.login,
+      ownerSourceId: data.owner.id,
+      ownerAvatarUrl: data.owner.avatar_url,
+      ownerHtmlUrl: data.owner.html_url,
+      description: data.description,
+      url: data.html_url,
+      homepage: data.homepage,
+      stars: data.stargazers_count,
+      forks: data.forks_count,
+      openIssues: data.open_issues_count,
+      license: data.license?.spdx_id ?? null,
+      topics: data.topics ?? [],
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+      pushedAt: data.pushed_at,
+    };
+  }
+
+  async getLanguages(
+    owner: string,
+    repo: string,
+  ): Promise<Record<string, number> | null> {
+    this.checkRateLimit();
+
+    const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/languages`;
+    this.rateLimitRemaining = Math.max(0, this.rateLimitRemaining - 1);
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: this.getHeaders(),
+    });
+    this.updateRateLimit(response);
+
+    if (!response.ok) return null;
+
+    return (await response.json()) as Record<string, number>;
+  }
+
+  // getTeamMembership checks whether `username` belongs to the given org team,
+  // authenticating as the end user via their OAuth access token (requires the
+  // read:org scope). Returns true when the membership state is "active".
+  async getTeamMembership(
+    org: string,
+    team: string,
+    username: string,
+    userAccessToken: string,
+  ): Promise<boolean> {
+    const url = `${GITHUB_API_BASE}/orgs/${org}/teams/${team}/memberships/${username}`;
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        Authorization: `Bearer ${userAccessToken}`,
+      },
+    });
+
+    if (!response.ok) return false;
+
+    const data = (await response.json()) as { state?: string };
+    return data.state === "active";
+  }
+
+  // listTeamMembers returns the members of an org team, authenticated as the
+  // signed-in admin via their own OAuth access token (read:org scope). Used by
+  // /admin/moderators for a read-only view of who currently has moderator
+  // powers; membership changes go through GitHub directly, not this panel.
+  async listTeamMembers(
+    org: string,
+    team: string,
+    userAccessToken: string,
+  ): Promise<{ login: string; avatar_url: string; html_url: string }[]> {
+    const url = `${GITHUB_API_BASE}/orgs/${org}/teams/${team}/members?per_page=100`;
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        Authorization: `Bearer ${userAccessToken}`,
+      },
+    });
+
+    if (!response.ok) return [];
+
+    const data = (await response.json()) as {
+      login: string;
+      avatar_url: string;
+      html_url: string;
+    }[];
+    return data;
   }
 
   getRateLimitStatus() {

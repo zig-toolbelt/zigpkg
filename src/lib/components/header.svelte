@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { onMount } from "svelte";
-  import { ChevronDown, CircleAlert, ExternalLink, LogOut, Package, Search, Star, X } from "lucide-svelte";
+  import { ChevronDown, CircleAlert, ExternalLink, LogOut, Package, Plus, Search, Shield, ShieldCheck, Star, X } from "lucide-svelte";
   import { signIn, signOut } from "@auth/sveltekit/client";
 
   import Logo from "$lib/components/logo.svelte";
@@ -19,12 +19,16 @@
     syncOverdue = false,
     user = null,
     githubStars = null,
+    isModerator = false,
+    isAdmin = false,
   }: {
     lastSyncedAt: string | null;
     lastSyncedAtExact?: string | null;
     syncOverdue?: boolean;
     user?: HeaderUser;
     githubStars?: number | null;
+    isModerator?: boolean;
+    isAdmin?: boolean;
   } = $props();
 
   const starCountFormatter = new Intl.NumberFormat("en", { notation: "compact" });
@@ -37,6 +41,7 @@
   const navItems = [
     { label: "Browse", href: "/packages", match: "/packages" },
     { label: "Docs", href: "/docs", match: "/docs" },
+    { label: "School", href: "/school", match: "/school" },
     { label: "Blog", href: "/blog", match: "/blog" },
   ];
 
@@ -185,6 +190,31 @@
                     <Package class="h-3.5 w-3.5" />
                     Your packages
                   </a>
+                  <a
+                    href="/submit"
+                    class="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  >
+                    <Plus class="h-3.5 w-3.5" />
+                    Submit package
+                  </a>
+                  {#if isModerator}
+                    <a
+                      href="/moderation"
+                      class="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    >
+                      <Shield class="h-3.5 w-3.5" />
+                      Moderation
+                    </a>
+                  {/if}
+                  {#if isAdmin}
+                    <a
+                      href="/admin"
+                      class="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    >
+                      <ShieldCheck class="h-3.5 w-3.5" />
+                      Admin
+                    </a>
+                  {/if}
                 </div>
 
                 <div class="border-t border-slate-100 py-0.5">

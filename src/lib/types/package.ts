@@ -1,4 +1,6 @@
 export type PackageType = 'library' | 'application';
+export type PackageStatus = 'approved' | 'pending' | 'rejected';
+export type PackageOrigin = 'sync' | 'manual';
 
 export interface ZigPackage {
 	id: number;
@@ -22,6 +24,16 @@ export interface ZigPackage {
 	updatedAt: Date;
 	pushedAt: Date;
 	cachedAt: Date;
+	status: PackageStatus;
+	origin: PackageOrigin;
+	submittedBy: string | null;
+	submittedAt: Date | null;
+	reviewedBy: string | null;
+	reviewedAt: Date | null;
+	rejectionReason: string | null;
+	primaryLanguage: string | null;
+	hasZigFiles: boolean | null;
+	hasBuildZigZon: boolean | null;
 }
 
 export interface PackageListItem {

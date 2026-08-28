@@ -16,6 +16,7 @@ declare module '@auth/core/types' {
 		avatarUrl?: string | null;
 		htmlUrl?: string | null;
 		bio?: string | null;
+		bannedAt?: Date | null;
 	}
 }
 
@@ -59,6 +60,10 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		GitHub({
 			clientId: env.AUTH_GITHUB_ID,
 			clientSecret: env.AUTH_GITHUB_SECRET,
+			// read:org lets the app verify the signed-in user's membership in the
+			// moderator team (see src/lib/server/auth/moderation.ts) using their own
+			// OAuth token rather than a server-issued one.
+			authorization: { params: { scope: 'read:org' } },
 			profile(profile: GitHubProfile) {
 				return {
 					id: profile.id.toString(),
@@ -79,6 +84,14 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		// Database strategy passes the full `users` row as `user` — no extra
 		// query needed to surface our own columns alongside Auth.js's defaults.
 		session({ session, user }) {
+			// Banned users: strip all identifying fields so downstream
+			// `session?.user?.id` checks fail, effectively treating them as
+			// signed out. The session row stays in the DB until it expires or
+			// is revoked, but the user sees no authenticated state.
+			if (user.bannedAt) {
+				return { ...session, user: {} as typeof session.user };
+			}
+			session.user.id = user.id;
 			session.user.username = user.username;
 			session.user.avatarUrl = user.avatarUrl;
 			session.user.htmlUrl = user.htmlUrl;

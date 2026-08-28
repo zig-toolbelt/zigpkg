@@ -29,6 +29,20 @@
       "when": 1783200090768,
       "tag": "0003_mute_network",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1785018486313,
+      "tag": "0004_freezing_typhoid_mary",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785022487179,
+      "tag": "0005_slim_jackal",
+      "breakpoints": true
     }
   ]
 }

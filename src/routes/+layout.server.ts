@@ -4,6 +4,8 @@ import { syncMetadata } from '$lib/server/db/schema';
 import { max } from 'drizzle-orm';
 import { getSiteRepoStars } from '$lib/server/github/repo-stats';
 import { formatSyncFreshness, isSyncOverdue } from '$lib/utils/formatSyncFreshness';
+import { isModerator } from '$lib/server/auth/moderation';
+import { isAdmin } from '$lib/server/auth/admin';
 
 export const load: LayoutServerLoad = async (event) => {
 	const session = await event.locals.auth();
@@ -14,9 +16,6 @@ export const load: LayoutServerLoad = async (event) => {
 	]);
 
 	const date = result[0]?.lastSyncAt ? new Date(result[0].lastSyncAt) : null;
-	// lastSyncedAt is the header's at-a-glance freshness label; lastSyncedAtExact
-	// is the precise UTC timestamp, surfaced as a hover tooltip for anyone who
-	// wants it (see header.svelte).
 	const lastSyncedAt = date ? formatSyncFreshness(date) : null;
 	const syncOverdue = date ? isSyncOverdue(date) : false;
 	const lastSyncedAtExact = date
@@ -34,5 +33,10 @@ export const load: LayoutServerLoad = async (event) => {
 		? { username: session.user.username, avatarUrl: session.user.avatarUrl, htmlUrl: session.user.htmlUrl }
 		: null;
 
-	return { lastSyncedAt, lastSyncedAtExact, syncOverdue, user, githubStars };
+	const [moderator, admin] = await Promise.all([
+		session?.user?.id ? isModerator(session.user.id) : Promise.resolve(false),
+		session?.user?.id ? isAdmin(session.user.id) : Promise.resolve(false)
+	]);
+
+	return { lastSyncedAt, lastSyncedAtExact, syncOverdue, user, githubStars, isModerator: moderator, isAdmin: admin };
 };

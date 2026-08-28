@@ -9,26 +9,36 @@ import (
 )
 
 type Package struct {
-	ID            int32
-	Source        string
-	SourceID      int64
-	Name          string
-	FullName      string
-	OwnerID       string
-	Description   pgtype.Text
-	Version       pgtype.Text
-	Stars         int32
-	Forks         int32
-	OpenIssues    int32
-	License       pgtype.Text
-	Homepage      pgtype.Text
-	RepositoryUrl string
-	Topics        []byte
-	PackageType   string
-	CreatedAt     pgtype.Timestamptz
-	UpdatedAt     pgtype.Timestamptz
-	PushedAt      pgtype.Timestamptz
-	CachedAt      pgtype.Timestamptz
+	ID              int32
+	Source          string
+	SourceID        int64
+	Name            string
+	FullName        string
+	OwnerID         string
+	Description     pgtype.Text
+	Version         pgtype.Text
+	Stars           int32
+	Forks           int32
+	OpenIssues      int32
+	License         pgtype.Text
+	Homepage        pgtype.Text
+	RepositoryUrl   string
+	Topics          []byte
+	PackageType     string
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	PushedAt        pgtype.Timestamptz
+	CachedAt        pgtype.Timestamptz
+	Status          string
+	Origin          string
+	SubmittedBy     pgtype.Text
+	SubmittedAt     pgtype.Timestamptz
+	ReviewedBy      pgtype.Text
+	ReviewedAt      pgtype.Timestamptz
+	RejectionReason pgtype.Text
+	PrimaryLanguage pgtype.Text
+	HasZigFiles     pgtype.Bool
+	HasBuildZigZon  pgtype.Bool
 }
 
 type PackageContent struct {

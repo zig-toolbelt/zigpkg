@@ -37,6 +37,8 @@
     syncOverdue={data.syncOverdue}
     user={data.user}
     githubStars={data.githubStars}
+    isModerator={data.isModerator}
+    isAdmin={data.isAdmin}
   />
   <main class="flex-1 w-full">
     {@render children()}

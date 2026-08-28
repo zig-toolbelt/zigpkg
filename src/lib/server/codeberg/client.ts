@@ -1,6 +1,6 @@
 import type { GitHubTag, GitHubContent } from '$lib/types/github';
 import { env } from '$env/dynamic/private';
-import type { ContentClient, ReadmeSource } from '$lib/server/content-client';
+import type { RepoClient, ReadmeSource, RepoMetadata } from '$lib/server/content-client';
 
 const CODEBERG_API_BASE = 'https://codeberg.org/api/v1';
 const REQUEST_TIMEOUT_MS = 8000;
@@ -25,7 +25,26 @@ interface ForgejoTag {
 // content pipeline is source-agnostic (see ContentClient). Forgejo has no
 // dedicated readme endpoint, so getReadme finds the README in the root listing
 // and fetches it raw.
-export class CodebergClient implements ContentClient {
+interface ForgejoRepo {
+  id: number;
+  name: string;
+  full_name: string;
+  owner: { login: string; id: number; avatar_url: string; html_url: string };
+  description: string | null;
+  html_url: string;
+  homepage: string | null;
+  stars_count?: number;
+  forks_count?: number;
+  open_issues_count?: number;
+  external_tracker?: null;
+  license?: string | null;
+  topics?: string[];
+  created_at: string;
+  updated_at: string;
+  pushed_at?: string;
+}
+
+export class CodebergClient implements RepoClient {
 	private headers(accept = 'application/json'): HeadersInit {
 		const headers: Record<string, string> = { Accept: accept };
 		// Token is optional: anonymous reads work but are limited harder.
@@ -104,6 +123,50 @@ export class CodebergClient implements ContentClient {
 		if (content === null) return null;
 
 		return { filename: readme.name, content };
+	}
+
+	async getRepo(owner: string, repo: string): Promise<RepoMetadata | null> {
+		const url = `${CODEBERG_API_BASE}/repos/${owner}/${repo}`;
+		const response = await fetch(url, {
+			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+			headers: this.headers()
+		});
+
+		if (!response.ok) return null;
+
+		const data = (await response.json()) as ForgejoRepo;
+		return {
+			sourceId: data.id,
+			name: data.name,
+			fullName: data.full_name,
+			ownerLogin: data.owner.login,
+			ownerSourceId: data.owner.id,
+			ownerAvatarUrl: data.owner.avatar_url,
+			ownerHtmlUrl: data.owner.html_url,
+			description: data.description,
+			url: data.html_url,
+			homepage: data.homepage,
+			stars: data.stars_count ?? 0,
+			forks: data.forks_count ?? 0,
+			openIssues: data.open_issues_count ?? 0,
+			license: data.license ?? null,
+			topics: data.topics ?? [],
+			createdAt: data.created_at,
+			updatedAt: data.updated_at,
+			pushedAt: data.pushed_at ?? data.updated_at
+		};
+	}
+
+	async getLanguages(owner: string, repo: string): Promise<Record<string, number> | null> {
+		const url = `${CODEBERG_API_BASE}/repos/${owner}/${repo}/languages`;
+		const response = await fetch(url, {
+			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+			headers: this.headers()
+		});
+
+		if (!response.ok) return null;
+
+		return (await response.json()) as Record<string, number>;
 	}
 }
 

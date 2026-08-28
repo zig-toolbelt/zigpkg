@@ -38,6 +38,16 @@ CREATE TABLE packages (
   updated_at timestamptz NOT NULL,
   pushed_at timestamptz NOT NULL,
   cached_at timestamptz NOT NULL DEFAULT now(),
+  status varchar(20) NOT NULL DEFAULT 'approved',
+  origin varchar(20) NOT NULL DEFAULT 'sync',
+  submitted_by text REFERENCES users(id),
+  submitted_at timestamptz,
+  reviewed_by text REFERENCES users(id),
+  reviewed_at timestamptz,
+  rejection_reason text,
+  primary_language varchar(50),
+  has_zig_files boolean,
+  has_build_zig_zon boolean,
   UNIQUE (source, source_id)
 );
 

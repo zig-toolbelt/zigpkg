@@ -8,7 +8,7 @@ CREATE TABLE "package_content" (
 	"last_sync" timestamp with time zone,
 	CONSTRAINT "package_content_package_id_unique" UNIQUE("package_id")
 );
---> statement-breakpoint
+
 CREATE TABLE "packages" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"github_id" bigint NOT NULL,
@@ -54,11 +54,19 @@ CREATE TABLE "users" (
 	CONSTRAINT "users_github_id_unique" UNIQUE("github_id"),
 	CONSTRAINT "users_username_unique" UNIQUE("username")
 );
---> statement-breakpoint
-ALTER TABLE "package_content" ADD CONSTRAINT "package_content_package_id_packages_id_fk" FOREIGN KEY ("package_id") REFERENCES "public"."packages"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "packages" ADD CONSTRAINT "packages_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "packages_stars_idx" ON "packages" USING btree ("stars");--> statement-breakpoint
-CREATE INDEX "packages_updated_idx" ON "packages" USING btree ("updated_at");--> statement-breakpoint
-CREATE INDEX "packages_cached_idx" ON "packages" USING btree ("cached_at");--> statement-breakpoint
-CREATE INDEX "packages_type_idx" ON "packages" USING btree ("package_type");--> statement-breakpoint
+
+ALTER TABLE "package_content"
+ADD CONSTRAINT "package_content_package_id_packages_id_fk"
+FOREIGN KEY ("package_id")
+REFERENCES "public"."packages"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "packages"
+ADD CONSTRAINT "packages_owner_id_users_id_fk"
+FOREIGN KEY ("owner_id")
+REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+
+CREATE INDEX "packages_stars_idx" ON "packages" USING btree ("stars");
+CREATE INDEX "packages_updated_idx" ON "packages" USING btree ("updated_at");
+CREATE INDEX "packages_cached_idx" ON "packages" USING btree ("cached_at");
+CREATE INDEX "packages_type_idx" ON "packages" USING btree ("package_type");
 CREATE INDEX "packages_owner_idx" ON "packages" USING btree ("owner_id");

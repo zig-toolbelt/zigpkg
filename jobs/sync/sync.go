@@ -133,6 +133,8 @@ func upsertRepo(ctx context.Context, q *db.Queries, srcName string, repo *source
 		CreatedAt:     pgtype.Timestamptz{Time: repo.CreatedAt, Valid: !repo.CreatedAt.IsZero()},
 		UpdatedAt:     pgtype.Timestamptz{Time: repo.UpdatedAt, Valid: !repo.UpdatedAt.IsZero()},
 		PushedAt:      pgtype.Timestamptz{Time: repo.PushedAt, Valid: !repo.PushedAt.IsZero()},
+		Status:        "approved",
+		Origin:        "sync",
 	}
 
 	if err := q.UpsertPackage(ctx, params); err != nil {

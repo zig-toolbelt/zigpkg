@@ -13,6 +13,15 @@
 
   const posts = [
     {
+      title: "Submit packages by hand, and a moderation queue",
+      excerpt:
+        "Popular Zig packages without a topic tag — like karlseguin/http.zig — used to be invisible to the registry. Now any signed-in user can submit a package from GitHub or Codeberg, and moderators review each submission before it goes live.",
+      category: "Updates",
+      date: "Jul 26, 2026",
+      readTime: "3 min read",
+      href: "/blog/manual-submissions-jul-26-2026",
+    },
+    {
       title: "Package links now unfurl with real previews",
       excerpt:
         "Pasting a zigpkg link into Slack, Discord, or a forum used to show the generic site card no matter what you linked to. Now you get the real package name and description, plus a generated preview image with stars, license, and the maintainer's avatar.",

@@ -14,10 +14,12 @@ INSERT INTO packages (
   source, source_id, name, full_name, owner_id,
   description, version, stars, forks, open_issues,
   license, homepage, repository_url, topics,
-  package_type, created_at, updated_at, pushed_at, cached_at
+  package_type, created_at, updated_at, pushed_at,
+  status, origin, cached_at
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8, $9,
-  $10, $11, $12, $13, $14, $15, $16, $17, $18, now()
+  $10, $11, $12, $13, $14, $15, $16, $17, $18,
+  $19, $20, now()
 )
 ON CONFLICT (source, source_id) DO UPDATE SET
   name           = EXCLUDED.name,

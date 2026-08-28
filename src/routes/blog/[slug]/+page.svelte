@@ -41,6 +41,51 @@
 
   const posts: Post[] = [
     {
+      slug: "manual-submissions-jul-26-2026",
+      title: "Submit packages by hand, and a moderation queue",
+      excerpt:
+        "Popular Zig packages without a topic tag — like karlseguin/http.zig — used to be invisible to the registry. Now any signed-in user can submit a package from GitHub or Codeberg, and moderators review each submission before it goes live.",
+      category: "Updates",
+      date: "Jul 26, 2026",
+      readTime: "3 min read",
+      author: "zigpkg team",
+      callout: {
+        before: { label: "Before", value: "No topic tag → not indexed" },
+        after: { label: "After", value: "Submit → review → live" },
+      },
+      sections: [
+        {
+          title: "The problem",
+          body:
+            "The sync worker discovers packages by crawling GitHub and Codeberg for repos tagged `zig-package`, `zig-library`, or `zig-program`. That works well — but plenty of popular Zig packages never added a topic tag. `karlseguin/http.zig`, one of the most-used HTTP servers in the ecosystem, was completely invisible on the registry because of it. There was no way for a user to add it by hand.",
+        },
+        {
+          title: "What changed",
+          bullets: [
+            "**A submit form** at `/submit` — paste a repo URL (`https://github.com/karlseguin/http.zig`) or an `owner/repo` shorthand, and the registry fetches the metadata, checks for duplicates, and queues the package for review.",
+            "**A moderation queue** at `/moderation` — moderators see every pending submission with the repo's stars, license, topics, and validation signals, then approve or reject with a reason.",
+            "**Automatic validation** — each submission is checked for its primary language (is it actually Zig?), the presence of `build.zig.zon`, and `.zig` files in the root. Suspicious packages are flagged for the moderator but never blocked outright — the decision is human.",
+            "**Flagged packages view** — already-approved packages that look suspicious (sync-origin repos whose primary language isn't Zig, or that are missing `build.zig.zon`) surface in a separate tab so moderators can clean them up.",
+          ],
+        },
+        {
+          title: "Who can submit and moderate",
+          body:
+            "Any signed-in GitHub user can submit a package — same trust model as the sync worker, which indexes any public repo carrying the topic tag. Moderators are members of a configured GitHub team (set via `MODERATOR_ORG` and `MODERATOR_TEAM` env vars), verified through the user's own OAuth token with the `read:org` scope.",
+        },
+        {
+          title: "Under the hood",
+          bullets: [
+            "Every package now carries a `status` (`approved`, `pending`, `rejected`) and an `origin` (`sync` or `manual`). The sync worker writes `approved` on insert but never overwrites `status` on update — so a moderator's rejection sticks even if the repo gets re-discovered.",
+            "Validation signals (`primary_language`, `has_zig_files`, `has_build_zig_zon`) are cached on the package row at submission time, so the moderator sees them without re-fetching.",
+            "All public queries — search, browse, stats, sitemap — now filter `status = 'approved'`, so pending and rejected packages are invisible to visitors.",
+            "Moderator checks are cached for 5 minutes per user to avoid hitting the GitHub API on every page load.",
+          ],
+        },
+      ],
+      links: undefined,
+    },
+    {
       slug: "link-previews-jul-12-2026",
       title: "Package links now unfurl with real previews",
       excerpt:

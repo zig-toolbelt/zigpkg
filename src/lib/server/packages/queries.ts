@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { packages, packageContent, users } from '$lib/server/db/schema';
-import { desc, eq, sql, or, ilike, and } from 'drizzle-orm';
+import { desc, eq, sql, or, ilike, and, type SQL } from 'drizzle-orm';
 import type { PackageType } from '$lib/types/package';
 
 export type SortOption = 'stars' | 'updated' | 'new' | 'name';
@@ -62,7 +62,7 @@ function getSortColumn(sort: SortOption) {
 
 function buildConditions(options: QueryOptions) {
 	const { packageType, search, letter, owner, topic } = options;
-	const conditions = [];
+	const conditions: (SQL | undefined)[] = [eq(packages.status, 'approved')];
 
 	if (packageType) {
 		conditions.push(eq(packages.packageType, packageType));
@@ -141,7 +141,7 @@ export async function getOwnerStats(owner: string): Promise<{ totalStars: number
 		})
 		.from(packages)
 		.innerJoin(users, eq(packages.ownerId, users.id))
-		.where(eq(users.username, owner));
+		.where(and(eq(users.username, owner), eq(packages.status, 'approved')));
 
 	return { totalStars: result?.totalStars ?? 0 };
 }
@@ -151,6 +151,7 @@ export async function getMostPopular(limit = 6) {
 		.select(packageSelect)
 		.from(packages)
 		.innerJoin(users, eq(packages.ownerId, users.id))
+		.where(eq(packages.status, 'approved'))
 		.orderBy(desc(packages.stars))
 		.limit(limit);
 }
@@ -160,6 +161,7 @@ export async function getNewPackages(limit = 4) {
 		.select(packageSelect)
 		.from(packages)
 		.innerJoin(users, eq(packages.ownerId, users.id))
+		.where(eq(packages.status, 'approved'))
 		.orderBy(desc(packages.createdAt))
 		.limit(limit);
 }
@@ -169,6 +171,7 @@ export async function getRecentlyUpdated(limit = 4) {
 		.select(packageSelect)
 		.from(packages)
 		.innerJoin(users, eq(packages.ownerId, users.id))
+		.where(eq(packages.status, 'approved'))
 		.orderBy(desc(packages.pushedAt))
 		.limit(limit);
 }
@@ -179,7 +182,7 @@ export async function getPackageByFullName(fullName: string) {
 		.from(packages)
 		.innerJoin(users, eq(packages.ownerId, users.id))
 		.leftJoin(packageContent, eq(packages.id, packageContent.packageId))
-		.where(eq(packages.fullName, fullName))
+		.where(and(eq(packages.fullName, fullName), eq(packages.status, 'approved')))
 		.limit(1);
 
 	if (!result) return undefined;
@@ -199,7 +202,7 @@ export async function getPackageByFullNameCaseInsensitive(fullName: string) {
 		.from(packages)
 		.innerJoin(users, eq(packages.ownerId, users.id))
 		.leftJoin(packageContent, eq(packages.id, packageContent.packageId))
-		.where(sql`lower(${packages.fullName}) = lower(${fullName})`)
+		.where(and(sql`lower(${packages.fullName}) = lower(${fullName})`, eq(packages.status, 'approved')))
 		.limit(1);
 
 	if (!result) return undefined;
@@ -290,7 +293,8 @@ export async function getStats() {
 			totalApplications: sql<number>`count(*) filter (where ${packages.packageType} = 'application')::int`,
 			totalStars: sql<number>`coalesce(sum(${packages.stars}), 0)::int`
 		})
-		.from(packages);
+		.from(packages)
+		.where(eq(packages.status, 'approved'));
 
 	return result;
 }
@@ -309,6 +313,7 @@ export async function getAllPackageNames() {
 		.innerJoin(users, eq(packages.ownerId, users.id))
 		.where(
 			and(
+				eq(packages.status, 'approved'),
 				sql`${packages.pushedAt} > now() - interval '6 months'`,
 				sql`${packages.stars} >= 1`
 			)
@@ -352,7 +357,128 @@ export async function getPackageCount() {
 		.select({
 			count: sql<number>`count(*)::int`
 		})
-		.from(packages);
+		.from(packages)
+		.where(eq(packages.status, 'approved'));
 
 	return result?.count ?? 0;
+}
+
+// --- Moderation queries ---
+
+// Moderation list select: package + owner + submitter + validation signals.
+const moderationSelect = {
+	id: packages.id,
+	source: packages.source,
+	sourceId: packages.sourceId,
+	name: packages.name,
+	fullName: packages.fullName,
+	owner: users.username,
+	description: packages.description,
+	stars: packages.stars,
+	repositoryUrl: packages.repositoryUrl,
+	topics: packages.topics,
+	packageType: packages.packageType,
+	origin: packages.origin,
+	status: packages.status,
+	submittedAt: packages.submittedAt,
+	submittedBy: packages.submittedBy,
+	primaryLanguage: packages.primaryLanguage,
+	hasZigFiles: packages.hasZigFiles,
+	hasBuildZigZon: packages.hasBuildZigZon
+};
+
+export async function getPendingPackages(limit = 50, offset = 0) {
+	return db
+		.select(moderationSelect)
+		.from(packages)
+		.innerJoin(users, eq(packages.ownerId, users.id))
+		.where(eq(packages.status, 'pending'))
+		.orderBy(desc(packages.submittedAt))
+		.limit(limit)
+		.offset(offset);
+}
+
+export async function getPendingPackageCount(): Promise<number> {
+	const [result] = await db
+		.select({ count: sql<number>`count(*)::int` })
+		.from(packages)
+		.where(eq(packages.status, 'pending'));
+
+	return result?.count ?? 0;
+}
+
+// getFlaggedPackages returns approved packages whose cached validation signals
+// look suspicious: the primary language is not Zig, or build.zig.zon is missing.
+// These are surfaced to moderators for a second look without hiding them from
+// the public catalog (sync-origin packages are auto-approved).
+export async function getFlaggedPackages(limit = 50, offset = 0) {
+	return db
+		.select(moderationSelect)
+		.from(packages)
+		.innerJoin(users, eq(packages.ownerId, users.id))
+		.where(
+			and(
+				eq(packages.status, 'approved'),
+				sql`(${packages.primaryLanguage} is not null and ${packages.primaryLanguage} <> 'Zig') or ${packages.hasBuildZigZon} = false`
+			)
+		)
+		.orderBy(desc(packages.stars))
+		.limit(limit)
+		.offset(offset);
+}
+
+export async function getSubmission(id: number) {
+	const [result] = await db
+		.select()
+		.from(packages)
+		.innerJoin(users, eq(packages.ownerId, users.id))
+		.where(eq(packages.id, id))
+		.limit(1);
+
+	if (!result) return undefined;
+
+	return {
+		...result.packages,
+		owner: result.users.username,
+		ownerAvatarUrl: result.users.avatarUrl,
+		ownerHtmlUrl: result.users.htmlUrl
+	};
+}
+
+// approvePackage transitions a package from 'pending' to 'approved'. The
+// `status = 'pending'` guard in the WHERE clause makes the check atomic with
+// the update, so a moderator cannot re-approve or delist a package that has
+// already been approved/rejected through a direct POST. Returns true when the
+// row was actually transitioned, false when the package was not pending
+// (e.g., already approved, already rejected, or missing).
+export async function approvePackage(id: number, moderatorId: string): Promise<boolean> {
+	const result = await db
+		.update(packages)
+		.set({
+			status: 'approved',
+			reviewedBy: moderatorId,
+			reviewedAt: new Date(),
+			rejectionReason: null
+		})
+		.where(and(eq(packages.id, id), eq(packages.status, 'pending')))
+		.returning({ id: packages.id });
+	return result.length > 0;
+}
+
+// rejectPackage transitions a package from 'pending' to 'rejected'. Same
+// atomic `status = 'pending'` guard as approvePackage — prevents a moderator
+// from delisting an already-approved package via a direct POST. Returns true
+// when the row was transitioned, false otherwise.
+export async function rejectPackage(id: number, moderatorId: string, reason: string): Promise<boolean> {
+	const result = await db
+		.update(packages)
+		.set({
+			status: 'rejected',
+			reviewedBy: moderatorId,
+			reviewedAt: new Date(),
+			rejectionReason: reason
+		})
+		.where(and(eq(packages.id, id), eq(packages.status, 'pending')))
+		.returning({ id: packages.id });
+	return result.length > 0;
 }

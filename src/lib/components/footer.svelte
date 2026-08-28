@@ -10,6 +10,7 @@
     ],
     resources: [
       { label: "Documentation", href: "/docs" },
+      { label: "Zig School", href: "/school" },
       { label: "Blog", href: "/blog" },
     ],
     ecosystem: [{ label: "Packages", href: "/packages" }],
